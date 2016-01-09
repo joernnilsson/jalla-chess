@@ -1,0 +1,26 @@
+{
+  "name": "jalla-chess",
+  "version": "0.1.0",
+  "description": "",
+  "devDependencies": {
+    "awesome-typescript-loader": "^0.15.9",
+    "chess": "^0.2.7",
+    "chess.js": "^0.9.3",
+    "chessboardjs": "0.0.1",
+    "css-loader": "^0.23.0",
+    "del": "^2.2.0",
+    "es6-promise": "^3.0.2",
+    "extract-text-webpack-plugin": "^0.8.2",
+    "file-loader": "^0.8.5",
+    "gulp": "^3.9.0",
+    "gulp-load-plugins": "^1.1.0",
+    "gulp-util": "^3.0.7",
+    "image-webpack-loader": "^1.6.2",
+    "jquery": "^2.1.4",
+    "path": "^0.12.7",
+    "style-loader": "^0.13.0",
+    "typescript": "^1.7.5",
+    "webpack": "^1.12.9",
+    "webpack-dev-server": "^1.14.0"
+  }
+}

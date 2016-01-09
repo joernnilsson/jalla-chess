@@ -1,0 +1,66 @@
+
+declare module "chess" {
+
+	export interface SimpleGameClient {
+		getStatus(): GameStatus;
+		move(src: string, dest: string, promo: string): any
+		move(src: Square, dest: Square, promo: string): any
+	}
+
+	export interface AlgebraicGameClient {
+		getStatus(): GameStatus;
+	}
+
+	interface Square {
+		file: string,
+		piece: Piece,
+		rank: number, 
+	}
+
+	interface Move {
+      dest: Square;
+      source: Square;
+      piece: Piece;
+    }
+
+	interface PieceMove {
+		squares: Square[];
+		src: Square;
+    }
+
+    interface Side {
+    	name: string
+    }
+
+    interface Piece {
+    	moveCount: number;
+    	notation: string;
+    	side: Side;
+    	type: string;
+    }
+
+    interface Pawn extends Piece {}
+    interface Rook extends Piece {}
+    interface Knight extends Piece {}
+    interface Queen extends Piece {}
+    interface King extends Piece {}
+    interface Bishop extends Piece {}
+
+
+
+	export interface GameStatus {
+		board: any,
+		isCheckmate: boolean,
+		isCheck: boolean,
+		isRepitition: boolean;
+		isStalemate: boolean;
+		notatedMoves: any;
+		validMoves: PieceMove[];
+	}
+
+	export function create(): AlgebraicGameClient;
+	export function createSimple(): SimpleGameClient;
+
+
+}
+
