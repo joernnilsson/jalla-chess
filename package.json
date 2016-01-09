@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "description": "",
   "devDependencies": {
+  },
+  "dependencies": {
     "awesome-typescript-loader": "^0.15.9",
     "chess": "^0.2.7",
     "chess.js": "^0.9.3",
