@@ -8,6 +8,8 @@ var jq = require("jquery")
 window.$ = jq;
 // console.log(chessjs);
 
+require("file?name=index.html!./index.html");
+
 
 var url1 = require("file?name=bbb.png!../node_modules/chessboardjs/www/img/chesspieces/alpha/wP.png");
 var url2 = require("../node_modules/chessboardjs/www/img/chesspieces/alpha/bP.png");

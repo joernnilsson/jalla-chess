@@ -2,8 +2,7 @@
   "name": "jalla-chess",
   "version": "0.1.0",
   "description": "",
-  "devDependencies": {
-  },
+  "devDependencies": {},
   "dependencies": {
     "awesome-typescript-loader": "^0.15.9",
     "chess": "^0.2.7",
@@ -17,6 +16,7 @@
     "gulp": "^3.9.0",
     "gulp-load-plugins": "^1.1.0",
     "gulp-util": "^3.0.7",
+    "http-server": "^0.8.5",
     "image-webpack-loader": "^1.6.2",
     "jquery": "^2.1.4",
     "path": "^0.12.7",
@@ -24,5 +24,8 @@
     "typescript": "^1.7.5",
     "webpack": "^1.12.9",
     "webpack-dev-server": "^1.14.0"
+  },
+  "scripts":{
+    "start": "node_modules/http-server/bin/http-server dist"
   }
 }
