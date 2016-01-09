@@ -12,6 +12,7 @@ declare module "chess.js" {
 		move(move: string): any;
 		fen(): any;
 		load(fen: string);
+		load_pgn(pgn: string, options?: any);
 		moves(): string[];
 		turn(): string;
 

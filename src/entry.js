@@ -29,9 +29,6 @@ var url2 = require("../node_modules/chessboardjs/www/img/chesspieces/alpha/bP.pn
 window.chessjs = chessjs;
 window.chessboard = chessboard;
 
-
-document.write("batman");
-
 var appmod = require("./app.ts");
 var app = appmod.create();
 // console.log(app);

@@ -32,10 +32,10 @@ class App {
 		// Chess game
 		this.game = new Chess();
 		this.engine = new MaterialEngine();
-		console.log(this.game);
 
+		// this.game.load_pgn("1. e4 Nh6 2. d4 Ng8 3. Bf4 f6 4. e5 f5 5. h4 b6 6. h5 Kf7 7. h6 gxh6 8. Qh5+ Kg7 9. Qf7+ Kxf7 10. Nh3 h5 11. Be2 Ke8 12. Bxh5#");
+		// this.game.load_pgn("1. e4 Nh6 2. d4 Ng8 3. Bf4 f6 4. e5 f5 5. h4 b6 6. h5 Kf7 7. h6 gxh6 8. Qh5+ Kg7 9. Qf7+ Kxf7 10. Nh3 h5");
 
-		console.log(this.engine.evaluate("rnbqkbnr/pppppppp/8/8/8/8/PP3PPP/RNBQKBNR w KQkq -"));
 
 		// ChessBoard
 		let pieceReq = (p) => {	
@@ -45,7 +45,7 @@ class App {
 		this.board = new ChessBoard("board", {
 			draggable: true,
 			pieceTheme: pieceReq, 
-			position: "start",
+			position: this.game.fen(),
 			onDragStart: (...args: any[]) => this.onDragStart.apply(this, args),
 			onDrop: (...args: any[]) => this.onDrop.apply(this, args),
 			onSnapEnd: (...args: any[]) => this.onSnapEnd.apply(this, args)

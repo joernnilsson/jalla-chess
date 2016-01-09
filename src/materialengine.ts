@@ -166,42 +166,6 @@ export class MaterialEngine {
 		return node.bestMove.moveTo;
 	}
 
-	findBestMove(fen: string, depth: number): string {
-		let node = TreeNode.createPrev(fen, null, this.evaluate(fen));
-		console.log("Score: "+node.score.getComparableScore());
-		return this.findBestMoveNode(node);
-	}
-
-	findBestMoveNode(node: TreeNode): string{
-		let sim = this.sim(node.fen);
-		let moves = sim.moves();
-		let turn = sim.turn();
-
-		this.calcChildren(node, 2);
-
-		let sorted = node.children.sort(TreeNode.compare);
-
-		return sorted[0].moveTo;
-	}
-
-	calcChildren(node: TreeNode, depth: number){
-		let sim = this.sim(node.fen);
-		node.children = [];
-		for (let m of sim.moves()){
-			sim.load(node.fen);
-			sim.move(m);
-			let c = TreeNode.createPrev(sim.fen(), m, this.evaluate(sim.fen()));
-
-			if (depth > 1) {
-				this.calcChildren(c, depth - 1);
-			}
-
-			node.children.push(c);
-			//console.log(m + " " + c.score.getComparableScore());
-
-		}
-	}
-
 	evaluate(fen: string): Score {
 
 		let sim = this.sim(fen);
@@ -212,7 +176,7 @@ export class MaterialEngine {
 		if (sim.in_draw()) {
 			return new DrawScore();
 		} else if(sim.in_checkmate()){
-			return new WonScore(turn);
+			return new WonScore(turn == "w" ? "b" : "w");
 		}
 
 		// Count material
