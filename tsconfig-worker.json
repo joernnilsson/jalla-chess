@@ -1,18 +1,21 @@
 {
     "compilerOptions": {
         "module": "commonjs",
-        "target": "es5",
+        "target": "es6",
         "noImplicitAny": false,
         "outDir": "tsc",
         "rootDir": "src",
         "sourceMap": true,
-        "watch": false
+        "watch": false,
+        "noLib": true
     },
-    "exclude": [
-        "node_modules",
+    "files": [
         "src/tsworker.ts"
     ],
+    "exclude": [
+        "node_modules",
+    ],
     "awesomeTypescriptLoaderOptions": {
-        "instanceName": "app"
+        "instanceName": "worker"
     }
 }

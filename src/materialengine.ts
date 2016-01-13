@@ -1,65 +1,40 @@
+/// <reference path="es6-promise.d.ts" />
+/// <reference path="threads.d.ts" />
+/// <reference path="d3.d.ts" />
 "use strict";
 
 import Engine = require("./engine");
 import Chess = require("chess.js");
+import {Promise} from 'es6-promise';
+import threads = require("threads");
+import d3 = require("d3");
+
+import {Deferred} from "./Deferred";
+import {WorkerTask, WorkerResult} from "./WorkerTask";
+import {Score, DrawScore, MateInScore, NumericScore, WonScore} from "./score";
+
+import {SimulatorTaskExecutor} from "./TaskExecutor";
+import {Node} from "./GameTree";
+import {WorkerPool} from "./WorkerPool";
+
+/**
+
+Web worker layout:
+
+
+
+
+
+
+*/
+
+
 
 interface Move {
 	from: any;
 	to: any;
 	promotion: string;
 }
-
-abstract class Score {
-	abstract getComparableScore(): number;
-	static compare(a: Score, b: Score): number {
-		let as = a.getComparableScore();
-		let bs = b.getComparableScore();
-		return as - bs;
-	}
-}
-
-class NumericScore extends Score {
-	numeric: number;
-	constructor(score: number) {
-		super();
-		this.numeric = score;
-	}
-	getComparableScore(){
-		return this.numeric;
-	}
-}
-
-class WonScore extends Score {
-	side: string;
-	constructor(side: string) {
-		super();
-		this.side = side;
-	}
-	getComparableScore() {
-		return this.side == 'w' ? 1e6 : -1e6;
-	}
-}
-
-class MateInScore extends Score {
-	side: string;
-	moves: number;
-	constructor(side: string, moves: number){
-		super();
-		this.side = side;
-		this.moves = moves;
-	}
-	getComparableScore() {
-		let num = 1e3 + this.moves;
-		return this.side == 'w' ? num : -num;
-	}
-}
-
-class DrawScore extends Score {
-	getComparableScore() {
-		return 0.0;
-	}
-}
-
 
 class TreeNode {
 	moveTo: string;
@@ -95,14 +70,18 @@ class TreeNode {
 }
 
 
+
+
 export class MaterialEngine {
 
 	tree: TreeNode;
-	// game: chess.SimpleGameClient;
 	simulator: Chess;
+	pool: WorkerPool;
 
 	constructor(){
 		this.simulator = new Chess();
+		this.pool = new WorkerPool(1, true);
+		this.pool = new WorkerPool(8, false);
 	}
 
 	sim(fen: string){
@@ -150,6 +129,283 @@ export class MaterialEngine {
 		node.bestMove = bestNodes[Math.floor(Math.random() * bestNodes.length)];
 
 	}
+
+	// Quick fen to turn, without simulator
+	fenToTurn(fen: string): string {
+		return fen.split(" ")[1];
+	}
+
+	findBestMoveParallel(fen: string, timeToThink: number): Promise<string>{
+		let engine = this;
+		let deferred = new Deferred<string>();
+		let keepRunning = true;
+
+		// Reset thread pool
+		engine.pool.disable();
+		engine.pool.enable();
+
+
+		let bestMove = (node: Node): Node => {
+			let turn = engine.fenToTurn(node.fen);
+			let bestNodes: Node[] = [];
+
+			for (let c of node.children) {
+				if (bestNodes.length == 0) {
+					bestNodes.push(c);
+				} else if (Node.compareBest(c, bestNodes[0]) == 0) {
+					bestNodes.push(c);
+				} else if ((turn == 'w' && Node.compareBest(c, bestNodes[0]) > 0)
+					|| (turn == 'b' && Node.compareBest(bestNodes[0], c) > 0)) {
+					bestNodes = [];
+					bestNodes.push(c);
+				}
+			}
+
+			return bestNodes[Math.floor(Math.random() * bestNodes.length)];
+		};
+
+		let climb = (node: Node): number => {
+			let bestChild = bestMove(node);
+			if (bestChild) {
+				// Else game over
+				node.bestMove = { move: bestChild, score: Node.getBestScore(bestChild) };
+			}
+			if (node.parent) {
+				return climb(node.parent) + 1;
+			} else {
+				return 0;
+			}
+		}
+
+
+		let maxDepth = 1;
+		let onNodeEvaluated = (node: Node) => {
+
+			// Set the parent reference correctly
+			for (let c of node.children) {
+				c.parent = node;
+			}
+
+			// TODO Debounce best child evaluations at root/high level
+
+			// Find the best move. Walk up the tree and deliver the good news.
+			let depth = climb(node);
+
+			// Schedule next level
+			if(depth <= maxDepth){
+				for(let c of node.children){
+					((child: Node) => {
+						this.pool.enqueueTask(new WorkerTask(child.fen))
+							.then((createdNode: Node): Node => {
+								// Copy to the original child Node object
+								child.children = createdNode.children;
+								return child;
+							})
+							.then(onNodeEvaluated).catch((e) => { console.error(e); });
+					})(c);
+					// var child = c;
+
+				}
+			} else {
+				// console.log("Stopping at max depth");
+			}
+
+			// Chainable
+			return node;
+		};
+
+		// Start evaluation!
+		// This creates the root node, creates first level child nodes and analyses them
+		this.pool.enqueueTask(new WorkerTask(fen))
+			.then(onNodeEvaluated)
+			.then((node: Node) => {
+				setTimeout(() => {
+					keepRunning = false;
+					engine.pool.disable();
+					// Time is up, return the best move
+					// engine.visualize(node);
+					deferred.resolve(node.bestMove.move.moveTo);
+				}, timeToThink);
+
+			}).catch((e) => { console.error(e); });
+
+
+
+		return deferred.getPromise();
+	}
+
+
+	visualize(node: Node){
+		// var d3 = require("d3");
+
+
+		// var treeData = [
+		// 	{
+		// 		"name": "Top Level",
+		// 		"parent": "null",
+		// 		"children": [
+		// 			{
+		// 				"name": "Level 2: A",
+		// 				"parent": "Top Level",
+		// 				"children": [
+		// 					{
+		// 						"name": "Son of A",
+		// 						"parent": "Level 2: A"
+		// 					},
+		// 					{
+		// 						"name": "Daughter of A",
+		// 						"parent": "Level 2: A"
+		// 					}
+		// 				]
+		// 			},
+		// 			{
+		// 				"name": "Level 2: B",
+		// 				"parent": "Top Level"
+		// 			}
+		// 		]
+		// 	}
+		// ];
+
+		var nodesEvaluated = 0;
+		let buildTree = (n: Node): any => {
+			nodesEvaluated++;
+			let v = {
+				// name: node.bestMove ? node.bestMove.move.moveTo + " (" + node.bestMove.score.numeric + ")" : "na",
+				name: (n.moveTo ? n.moveTo : "na") + " (" + (n.score?n.score.numeric:"") + "/" + (n.bestMove ? n.bestMove.score.numeric : "") + ")",
+				children: []
+			};
+			if (n.children){
+				for(let c of n.children){
+					v.children.push(buildTree(c));
+				}
+			}
+			return v;
+		}
+
+		// var root = treeData[0];
+		var root = buildTree(node);
+
+		console.log("Nodes evaluated: " + nodesEvaluated);
+
+		var margin = { top: 20, right: 120, bottom: 20, left: 120 },
+			width = 2000 - margin.right - margin.left,
+			height = 100000 - margin.top - margin.bottom;
+
+		var i = 0;
+
+		var tree = d3.layout.tree().size([height, width]);
+
+		var diagonal = d3.svg.diagonal()
+			.projection(function(d) { return [d.y, d.x]; });
+
+		var svg = d3.select("body").append("svg")
+			.attr("width", width + margin.right + margin.left)
+			.attr("height", height + margin.top + margin.bottom)
+			.append("g")
+			.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+		let update = function update(source) {
+
+			// Compute the new tree layout.
+			var nodes = tree.nodes(root).reverse(),
+				links = tree.links(nodes);
+
+			// Normalize for fixed-depth.
+			nodes.forEach(function(d) { d.y = d.depth * 180; });
+
+			// Declare the nodesâ€¦
+			var node = svg.selectAll("g.node")
+				.data(nodes, function(d: any) { return d.id || (d.id = ++i); });
+
+			// Enter the nodes.
+			var nodeEnter = node.enter().append("g")
+				.attr("class", "node")
+				.attr("transform", function(d) {
+					return "translate(" + d.y + "," + d.x + ")";
+				});
+
+			nodeEnter.append("circle")
+				.attr("r", 10)
+				.style("fill", "#fff");
+
+			nodeEnter.append("text")
+				.attr("x", function(d) {
+					return d.children || d._children ? -13 : 13;
+				})
+				.attr("dy", ".35em")
+				.attr("text-anchor", function(d) {
+					return d.children || d._children ? "end" : "start";
+				})
+				.text(function(d) { return d.name; })
+				.style("fill-opacity", 1);
+
+			// Declare the linksâ€¦
+			var link = svg.selectAll("path.link")
+				.data(links, function(d: any) { return d.target.id; });
+
+			// Enter the links.
+			link.enter().insert("path", "g")
+				.attr("class", "link")
+				.attr("d", diagonal);
+
+		}
+
+		update(root);
+	}
+
+	findBestMoveAsync(fen: string, timeToThink: number): Promise<string>{
+
+		/*
+			- Build tree with d = 1
+			- Evaluate nodes
+			- Propagate best moves to root when all are finished
+
+			- Extend tree with d = 2
+			- Evaluate new nodes
+			- Propagate best moves to root when all are finished
+
+		*/
+
+		let run = true;
+		// setTimeout(() => {
+		// 	run = false;
+		// }, timeToThink);
+
+		let defer = new Deferred<string>();
+		let root = Node.create(fen, null, null, null);
+
+		let exec = new SimulatorTaskExecutor();
+
+		let branches = [root];
+
+		while(run){
+
+			// let l: Promise<Node[]> = branches.map((val) => { return  });
+			let l = exec.evaluateChildren(root);
+			l.then((list)=>{
+				console.log(list);
+			});
+
+
+			// l.forEach(val => {
+			// 	console.log(val);
+			// })
+
+			break;
+		}
+
+		// this.evaluateChildrenAsync(root);
+
+		// Resolve promse with best result so far
+
+
+		return defer.getPromise();
+
+	}
+
+
+
+
 
 
 	findBestMoveRecursive(fen: string, depth: number): string {

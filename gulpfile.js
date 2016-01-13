@@ -20,7 +20,11 @@ function devServer() {
     publicPath: '/' + config.output.publicPath,
     stats: {colors: true},
     inline: true,
-    hot: false
+    hot: false,
+    headers: { "Cache-Control": "no-cache, no-store, must-revalidate",
+      "Pragma": "no-cache",
+      "Expires": "0"
+    }
   }).listen(8080, '0.0.0.0', function(err) {
     if (err) {
       throw new gutil.PluginError('webpack-dev-server', err);

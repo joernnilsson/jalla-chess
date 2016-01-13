@@ -8,6 +8,10 @@ var jq = require("jquery")
 window.$ = jq;
 // console.log(chessjs);
 
+
+// var d3 = require("./d3");
+// window.d3 = d3;
+
 require("file?name=index.html!./index.html");
 
 
@@ -33,3 +37,45 @@ var appmod = require("./app.ts");
 var app = appmod.create();
 // console.log(app);
 window.app = app;
+
+
+// var api = require("./WorkerTask");
+// var MyWorker = require("worker!./jsworker.js");
+// var worker = new MyWorker();
+// worker.addEventListener("message", function(event) {
+// 	console.log(event.data);
+// });
+
+// setTimeout(function() {
+// 	console.log("D");
+// 	worker.postMessage(new api.WorkerTask("rnbq1bnr/p1pppk1p/1p6/4Pp1p/3P1B2/7N/PPP2PP1/RN2KB1R w KQ - 0 11"));
+// }, 200);
+
+
+// require("awesome-typescript-loader?tsconfig='../tsconfig-worker.json'!./tsworker.ts");
+
+// var slave = require("file!./thread-slave.js");
+// var threads = require('threads');
+// threads.config.set({
+//   fallback: {
+//     slaveScriptUrl: slave}});
+// var Pool = threads.Pool;
+// var pool = new Pool(4);
+
+// const jobC = pool.run(
+//   function(input, done) {
+//     const hash = "BATMAN";
+//     done(hash, input);
+//   }
+// ).send('Hash this string!');
+
+// jobC
+//   .on('done', function(hash, input) {
+//     console.log(`Job C hashed: md5("${input}") = "${hash}"`);
+//   });
+
+
+
+
+
+

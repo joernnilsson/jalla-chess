@@ -35,6 +35,9 @@ class App {
 
 		// this.game.load_pgn("1. e4 Nh6 2. d4 Ng8 3. Bf4 f6 4. e5 f5 5. h4 b6 6. h5 Kf7 7. h6 gxh6 8. Qh5+ Kg7 9. Qf7+ Kxf7 10. Nh3 h5 11. Be2 Ke8 12. Bxh5#");
 		// this.game.load_pgn("1. e4 Nh6 2. d4 Ng8 3. Bf4 f6 4. e5 f5 5. h4 b6 6. h5 Kf7 7. h6 gxh6 8. Qh5+ Kg7 9. Qf7+ Kxf7 10. Nh3 h5");
+		// this.game.load_pgn("1. e4 a6 2. d4 f6 3. f4 g5 4. Qh5#");
+		// this.game.load_pgn("1. e4 a6 2. d4 f6 ");
+
 
 
 		// ChessBoard
@@ -50,6 +53,11 @@ class App {
 			onDrop: (...args: any[]) => this.onDrop.apply(this, args),
 			onSnapEnd: (...args: any[]) => this.onSnapEnd.apply(this, args)
 		});
+	}
+
+	load(pgn: string){
+		this.game.load_pgn(pgn);
+		this.board.position(this.game.fen());
 	}
 
 	// do not pick up pieces if the game is over
@@ -87,16 +95,29 @@ class App {
 		  var possibleMoves = that.game.moves();
 
 		  // game over
-		  if (possibleMoves.length === 0) return;
+		  if (possibleMoves.length === 0) {
+			  alert("Gmae over!");
+		  }
 
 		  // let move = that.engine.findBestMove(that.game.fen(), 1);
-		  let move = that.engine.findBestMoveRecursive(that.game.fen(), 3);
+		  // let movea = that.engine.findBestMoveAsync(that.game.fen(), 3000);
+		  let movea = that.engine.findBestMoveParallel(that.game.fen(), 5000);
+
+		  movea.then((move: string) => {
+			  console.log("The best move was: " + move);
+			  that.game.move(move);
+			  that.board.position(that.game.fen());
+		  })
+
+
+		  // let move = that.engine.findBestMoveRecursive(that.game.fen(), 3);
+
 
 		  // var randomIndex = Math.floor(Math.random() * possibleMoves.length);
 		  // let move = possibleMoves[randomIndex];
 
-		  that.game.move(move);
-		  that.board.position(that.game.fen());
+		  // that.game.move(move);
+		  // that.board.position(that.game.fen());
 
 
 	  }, 150); // Wait for animation
