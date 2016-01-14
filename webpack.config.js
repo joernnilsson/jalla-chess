@@ -5,7 +5,7 @@ var ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 module.exports = {
 	entry: {
-		app: "./src/entry.js"
+		entry: "./tsc/entry.js"
 			// ,tsworker: "./src/tsworker"
 	},
 
@@ -22,10 +22,20 @@ module.exports = {
 		filename: "[name].js"
 	},
 	plugins: [
-		new ExtractTextPlugin('app.css')
+		new ExtractTextPlugin('entry.css')
 	],
 	module: {
 		loaders: [
+
+		    {
+                loader: 'babel-loader',
+                test: /\.js$/,
+                query: {
+                  presets: 'es2015',
+                }
+            },
+
+
 			// { test: /\.css$/, loader: "style!css" },
 
 			// {

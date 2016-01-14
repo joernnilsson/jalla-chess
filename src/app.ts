@@ -1,20 +1,15 @@
 /// <reference path="chess.js.d.ts" />
 /// <reference path="chessboardjs.d.ts" />
-/// <reference path="jquery.d.ts" />
-"use strict";
 
 
-import * as jquery from "jquery";
-// import chessjs = require("./chess.js/chess")
-// import * as MaterialEngine from "materialengine.ts";
-
-import {MaterialEngine} from "./materialengine";
-//import MaterialEngine = require("./materialengine");
-import Chess = require("chess.js");
-// import * as cj from "chess.js";
 // import {Chess} from "chess.js";
-import ChessBoard = require("chessboardjs");
+// import * as ChessBoard from "chessboardjs";
+import ChessBoard from "chessboardjs";
+import Chess from "chess.js";
 import "chessboardjs/www/css/chessboard.css";
+import {MaterialEngine} from "./materialengine";
+
+
 
 
 // TODO I think this is a hack
@@ -28,6 +23,8 @@ class App {
 
 	constructor(){
 		console.log("Constructing app");
+
+		new ChessBoard("board");
 
 		// Chess game
 		this.game = new Chess();

@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
-        "module": "commonjs",
-        "target": "es5",
+        "module": "es6",
+        "target": "es6",
         "noImplicitAny": false,
         "outDir": "tsc",
         "rootDir": "src",
@@ -10,9 +10,11 @@
     },
     "exclude": [
         "node_modules",
+        "src.backup",
         "src/tsworker.ts"
     ],
     "awesomeTypescriptLoaderOptions": {
-        "instanceName": "app"
+        "instanceName": "app",
+        "useBabel": false
     }
 }

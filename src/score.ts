@@ -18,8 +18,8 @@ export abstract class Score {
 
 export class NumericScore extends Score {
 	constructor(score: number) {
-		this.numeric = score;
 		super();
+		this.numeric = score;
 	}
 	getComparableScore() {
 		return this.numeric;
@@ -29,8 +29,9 @@ export class NumericScore extends Score {
 export class WonScore extends Score {
 	side: string;
 	constructor(side: string) {
-		this.side = side;
 		super();
+		this.side = side;
+		this.numeric = this.getComparableScore();
 	}
 	getComparableScore() {
 		return this.side == 'w' ? 1e6 : -1e6;
@@ -41,9 +42,10 @@ export class MateInScore extends Score {
 	side: string;
 	moves: number;
 	constructor(side: string, moves: number) {
+		super();
 		this.side = side;
 		this.moves = moves;
-		super();
+		this.numeric = this.getComparableScore();
 	}
 	getComparableScore() {
 		let num = 1e3 + this.moves;

@@ -1,13 +1,10 @@
-/// <reference path="es6-promise.d.ts" />
-/// <reference path="threads.d.ts" />
+
 /// <reference path="d3.d.ts" />
 "use strict";
 
-import Engine = require("./engine");
-import Chess = require("chess.js");
-import {Promise} from 'es6-promise';
-import threads = require("threads");
-import d3 = require("d3");
+
+import Chess from "chess.js";
+import * as d3 from "d3";
 
 import {Deferred} from "./Deferred";
 import {WorkerTask, WorkerResult} from "./WorkerTask";
@@ -85,9 +82,9 @@ export class MaterialEngine {
 	}
 
 	sim(fen: string){
-		let sim = this.simulator;
-		sim.load(fen);
-		return sim;
+		let sims = this.simulator;
+		sims.load(fen);
+		return sims;
 	}
 
 

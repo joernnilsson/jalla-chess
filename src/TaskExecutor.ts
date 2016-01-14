@@ -1,11 +1,11 @@
 "use strict"
 
-import Engine = require("./engine");
-import Chess = require("chess.js");
-import {Promise} from 'es6-promise';
-import threads = require("threads");
+
+
+
+import Chess from "chess.js";
 import {Node} from "./GameTree";
-import * as evaluator from "./MaterialEvaluator";
+import {evaluator} from "./MaterialEvaluator";
 import {Score, DrawScore, MateInScore, NumericScore, WonScore} from "./score";
 
 // Intended to run as a web worker
@@ -19,9 +19,9 @@ export class SimulatorTaskExecutor {
 
 	// Aquire the simulator
 	private sim(fen: string) {
-		let sim = this.simulator;
-		sim.load(fen);
-		return sim;
+		let sims = this.simulator;
+		sims.load(fen);
+		return sims;
 	}
 
 	// TODO add logic to detect if simulator is already at the correct position

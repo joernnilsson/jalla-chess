@@ -1,7 +1,7 @@
 "use strict"
 
 
-import {Promise} from 'es6-promise';
+// import {Promise} from 'es6-promise';
 
 export class Deferred<T> {
 	private _resolve: (str: T) => void;

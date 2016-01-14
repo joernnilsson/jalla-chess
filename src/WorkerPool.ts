@@ -5,7 +5,7 @@ import {WorkerTask, WorkerResult} from "./WorkerTask";
 import {WorkerFactory, TaskWorker} from "./WorkerFactory";
 import {SimulatorTaskExecutor} from "./TaskExecutor";
 import {Node} from "./GameTree";
-import {Promise} from 'es6-promise';
+// import {Promise} from 'es6-promise';
 import {Deferred} from "./Deferred";
 
 
@@ -175,7 +175,8 @@ export class WorkerPool {
 
 	enqueueTask(task: WorkerTask): Promise<Node> {
 		if(!this.acceptTasks){
-			return Promise.reject("Pool is not accepting tasks");
+			// return Promise.reject(new Error("Pool is not accepting tasks"));
+			throw new Error("Pool is not accepting tasks");
 		}
 		let pt = ProcessingTask.getFor(task);
 		this.queue.push(pt);

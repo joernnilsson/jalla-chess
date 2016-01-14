@@ -1,9 +1,10 @@
 "use strict"
 
-import Chess = require("chess.js");
+
+import Chess from "chess.js";
 import {Score, DrawScore, MateInScore, NumericScore, WonScore} from "./score";
 
-let evaluate = function(sim: Chess): Score {
+export function evaluator(sim: Chess): Score {
 
 	let turn = sim.turn();
 	let fen = sim.fen();
@@ -42,4 +43,4 @@ let evaluate = function(sim: Chess): Score {
 	return new NumericScore(pw - pb);
 };
 
-export = evaluate;
+// export = evaluate;
