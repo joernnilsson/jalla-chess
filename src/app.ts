@@ -12,7 +12,7 @@ import {MaterialEngine} from "./materialengine";
 
 
 
-// TODO I think this is a hack
+// TODO I think this is a hack (you are correct, it depends on transpiling to es5/commonjs)
 declare var require: any;
 
 class App {

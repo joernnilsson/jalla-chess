@@ -1,29 +1,20 @@
-
 /// <reference path="d3.d.ts" />
 "use strict";
 
-
 import Chess from "chess.js";
 import * as d3 from "d3";
+// import * as format from "string-format";
 
 import {Deferred} from "./Deferred";
 import {WorkerTask, WorkerResult} from "./WorkerTask";
 import {Score, DrawScore, MateInScore, NumericScore, WonScore} from "./score";
 
 import {SimulatorTaskExecutor} from "./TaskExecutor";
+import {evaluator} from "./MaterialEvaluator";
 import {Node} from "./GameTree";
 import {WorkerPool} from "./WorkerPool";
 
-/**
-
-Web worker layout:
-
-
-
-
-
-
-*/
+import * as jquery from "jquery";
 
 
 
@@ -170,12 +161,14 @@ export class MaterialEngine {
 			if (node.parent) {
 				return climb(node.parent) + 1;
 			} else {
-				return 0;
+				return 1;
 			}
 		}
 
 
-		let maxDepth = 1;
+		let maxDepth = 100;
+		let nodesEvaluated = 0;
+		let maxDepthEvaluated = 0;
 		let onNodeEvaluated = (node: Node) => {
 
 			// Set the parent reference correctly
@@ -188,8 +181,11 @@ export class MaterialEngine {
 			// Find the best move. Walk up the tree and deliver the good news.
 			let depth = climb(node);
 
+			maxDepthEvaluated = Math.max(maxDepthEvaluated, depth);
+
 			// Schedule next level
 			if(depth <= maxDepth){
+				nodesEvaluated += node.children.length;
 				for(let c of node.children){
 					((child: Node) => {
 						this.pool.enqueueTask(new WorkerTask(child.fen))
@@ -214,6 +210,7 @@ export class MaterialEngine {
 		// Start evaluation!
 		// This creates the root node, creates first level child nodes and analyses them
 		this.pool.enqueueTask(new WorkerTask(fen))
+			.then(n => { n.score = evaluator(this.sim(n.fen)); return n;})
 			.then(onNodeEvaluated)
 			.then((node: Node) => {
 				setTimeout(() => {
@@ -221,10 +218,24 @@ export class MaterialEngine {
 					engine.pool.disable();
 					// Time is up, return the best move
 					// engine.visualize(node);
+					printBestPath(node);
 					deferred.resolve(node.bestMove.move.moveTo);
 				}, timeToThink);
 
 			}).catch((e) => { console.error(e); });
+
+		let printBestPath = (node: Node) => {
+			let engineStats = `Nodes evaluated: ${nodesEvaluated}, deepest line: ${maxDepthEvaluated}`;
+			console.log(engineStats);
+			// jquery("#engine-stats").text(engineStats);
+			let str = "Moves: (" + node.score.numeric + "/" + node.bestMove.score.numeric + ") ";
+			let n = node.bestMove.move;
+			while (n != null) {
+				str += n.moveTo + "(" + n.score.numeric + "/" + (n.bestMove?n.bestMove.score.numeric:"") + ") ";
+				n = n.bestMove? n.bestMove.move:null;
+			}
+			console.log(str);
+		}
 
 
 
@@ -233,35 +244,6 @@ export class MaterialEngine {
 
 
 	visualize(node: Node){
-		// var d3 = require("d3");
-
-
-		// var treeData = [
-		// 	{
-		// 		"name": "Top Level",
-		// 		"parent": "null",
-		// 		"children": [
-		// 			{
-		// 				"name": "Level 2: A",
-		// 				"parent": "Top Level",
-		// 				"children": [
-		// 					{
-		// 						"name": "Son of A",
-		// 						"parent": "Level 2: A"
-		// 					},
-		// 					{
-		// 						"name": "Daughter of A",
-		// 						"parent": "Level 2: A"
-		// 					}
-		// 				]
-		// 			},
-		// 			{
-		// 				"name": "Level 2: B",
-		// 				"parent": "Top Level"
-		// 			}
-		// 		]
-		// 	}
-		// ];
 
 		var nodesEvaluated = 0;
 		let buildTree = (n: Node): any => {

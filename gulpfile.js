@@ -16,12 +16,13 @@ function devServer() {
   // Start a webpack-dev-server
   new WebpackDevServer(webpack(config), {
   	path: config.path,
-    contentBase: 'src/',
+    contentBase: 'tsc/',
     publicPath: '/' + config.output.publicPath,
     stats: {colors: true},
     inline: true,
-    hot: false,
-    headers: { "Cache-Control": "no-cache, no-store, must-revalidate",
+    hot: true,
+    headers: {
+      "Cache-Control": "no-cache, no-store, must-revalidate",
       "Pragma": "no-cache",
       "Expires": "0"
     }
@@ -29,7 +30,7 @@ function devServer() {
     if (err) {
       throw new gutil.PluginError('webpack-dev-server', err);
     }
-    gutil.log('[webpack-dev-server]', 'http://localhost:3000/webpack-dev-server/index.html');
+    gutil.log('[webpack-dev-server]', 'http://localhost:8080/');
   });
 }
 
