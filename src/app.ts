@@ -8,6 +8,7 @@ import ChessBoard from "chessboardjs";
 import Chess from "chess.js";
 import "chessboardjs/www/css/chessboard.css";
 import {MaterialEngine} from "./materialengine";
+import {ChessComClient} from "./ChessComClient";
 
 
 
@@ -20,11 +21,14 @@ class App {
 	board: ChessBoard;
 	game: Chess;
 	engine: MaterialEngine;
+	chessComClient: ChessComClient;
 
 	constructor(){
 		console.log("Constructing app");
 
-		new ChessBoard("board");
+		// Chess.com client
+		// this.chessComClient = new ChessComClient();
+		// this.chessComClient.getMoves("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq -")
 
 		// Chess game
 		this.game = new Chess();
@@ -50,6 +54,16 @@ class App {
 			onDrop: (...args: any[]) => this.onDrop.apply(this, args),
 			onSnapEnd: (...args: any[]) => this.onSnapEnd.apply(this, args)
 		});
+
+		// let that = this;
+		// let movea = that.engine.findBestMoveParallel(that.game.fen(), 2000);
+
+		// movea.then((move: string) => {
+		// 	console.log("The best move was: " + move);
+		// 	that.game.move(move);
+		// 	that.board.position(that.game.fen());
+		// })
+
 	}
 
 	load(pgn: string){

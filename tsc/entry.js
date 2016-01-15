@@ -14,9 +14,6 @@ window.$ = jq;
 
 require("file?name=index.html!./index.html");
 
-
-var url1 = require("file?name=bbb.png!../node_modules/chessboardjs/www/img/chesspieces/alpha/wP.png");
-var url2 = require("../node_modules/chessboardjs/www/img/chesspieces/alpha/bP.png");
 // console.log(url1);
 // console.log(url2);
 

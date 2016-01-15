@@ -49,6 +49,19 @@ export class SimulatorTaskExecutor {
 		return Promise.all(list);
 	}
 
+
+
+	/*
+		Optimizations:
+			- Switch move def from SAN to object
+			- Switch move def to "ugly"
+			- move() gjøre en unødvendig moves()
+			- Modify chess.js to expose generate_moves() and modify move()
+
+		Evaluator:
+			- Tell angrep på brikker
+
+	*/
 	evaluateChildrenSync(node: Node): Node {
 
 		let sim = this.sim(node.fen);

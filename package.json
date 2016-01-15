@@ -9,8 +9,7 @@
   },
   "dependencies": {
     "awesome-typescript-loader": "^0.15.9",
-    "chess": "^0.2.7",
-    "chess.js": "^0.9.3",
+    "chess.js": "git+ssh://git@github.com:joernnilsson/chess.js.git",
     "chessboardjs": "0.0.1",
     "css-loader": "^0.23.0",
     "d3": "3.5.12",
@@ -35,7 +34,8 @@
     "typescript": "^1.7.5",
     "webpack": "^1.12.9",
     "webpack-dev-server": "^1.14.0",
-    "worker-loader": "^0.7.0"
+    "worker-loader": "^0.7.0",
+    "xhr-promise-es6": "^1.2.7"
   },
   "scripts": {
     "start": "node_modules/http-server/bin/http-server dist"

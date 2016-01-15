@@ -1,5 +1,12 @@
 
 
+export interface move88{
+	color: string;
+	flags: number;
+	from: number;
+	piece: string;
+}
+
 export default class Chess{
 
 	in_checkmate(): boolean;
@@ -14,6 +21,10 @@ export default class Chess{
 	load_pgn(pgn: string, options?: any);
 	moves(): string[];
 	turn(): string;
+
+	// Extended hp version
+	generate_moves(): move88[];
+	make_move(move: move88);
 
 }
 

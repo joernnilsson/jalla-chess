@@ -18,6 +18,7 @@ import * as jquery from "jquery";
 
 
 
+
 interface Move {
 	from: any;
 	to: any;
@@ -68,7 +69,7 @@ export class MaterialEngine {
 
 	constructor(){
 		this.simulator = new Chess();
-		this.pool = new WorkerPool(1, true);
+		// this.pool = new WorkerPool(1, true);
 		this.pool = new WorkerPool(8, false);
 	}
 
@@ -227,7 +228,7 @@ export class MaterialEngine {
 		let printBestPath = (node: Node) => {
 			let engineStats = `Nodes evaluated: ${nodesEvaluated}, deepest line: ${maxDepthEvaluated}`;
 			console.log(engineStats);
-			// jquery("#engine-stats").text(engineStats);
+			// jquery("#engine-stats").text(engineStats);	
 			let str = "Moves: (" + node.score.numeric + "/" + node.bestMove.score.numeric + ") ";
 			let n = node.bestMove.move;
 			while (n != null) {
