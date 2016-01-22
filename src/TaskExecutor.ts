@@ -57,9 +57,15 @@ export class SimulatorTaskExecutor {
 			- Switch move def to "ugly"
 			- move() gjøre en unødvendig moves()
 			- Modify chess.js to expose generate_moves() and modify move()
+			- Pruning
 
 		Evaluator:
 			- Tell angrep på brikker
+			- Kontroll i sentrum
+			- Kontroll på diagonaler
+			- Rokaderettigheter
+			- Eksponert konge
+			- "Attack map" (rundt konge?)
 
 	*/
 	evaluateChildrenSync(node: Node): Node {

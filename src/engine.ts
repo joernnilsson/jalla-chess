@@ -1,9 +1,10 @@
 "use strict";
 
 // TODO Switch to an ansyncrounous model
+import {Evaluator} from "./Evaluator";
 
+export abstract class Engine <T extends Evaluator> {
 
-export interface Engine {
-
+	abstract getBestMove(fen: string): Promise<string>;
 
 }

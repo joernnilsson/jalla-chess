@@ -7,9 +7,17 @@
 import ChessBoard from "chessboardjs";
 import Chess from "chess.js";
 import "chessboardjs/www/css/chessboard.css";
-import {MaterialEngine} from "./materialengine";
 import {ChessComClient} from "./ChessComClient";
+import {Engine} from "./engine";
 
+import {Evaluator} from "./Evaluator";
+import {EvaluatorMaterialCounter} from "./EvaluatorMaterialCounter";
+
+import {EngineAlphaBeta} from "./EngineAlphaBeta";
+import {EngineAlphaBetaHp} from "./EngineAlphaBetaHp";
+import {EngineMinMaxParallel} from "./EngineMinMaxParallel";
+
+import {MaterialEngine} from "./materialengine";
 
 
 
@@ -20,7 +28,7 @@ class App {
 
 	board: ChessBoard;
 	game: Chess;
-	engine: MaterialEngine;
+	engine: Engine<Evaluator>;
 	chessComClient: ChessComClient;
 
 	constructor(){
@@ -32,7 +40,11 @@ class App {
 
 		// Chess game
 		this.game = new Chess();
-		this.engine = new MaterialEngine();
+		// this.engine = new MaterialEngine();
+
+		// this.engine = new EngineMinMaxParallel<EvaluatorMaterialCounter>();
+		// this.engine = new EngineAlphaBeta<EvaluatorMaterialCounter>();
+		this.engine = new EngineAlphaBetaHp<EvaluatorMaterialCounter>();
 
 		// this.game.load_pgn("1. e4 Nh6 2. d4 Ng8 3. Bf4 f6 4. e5 f5 5. h4 b6 6. h5 Kf7 7. h6 gxh6 8. Qh5+ Kg7 9. Qf7+ Kxf7 10. Nh3 h5 11. Be2 Ke8 12. Bxh5#");
 		// this.game.load_pgn("1. e4 Nh6 2. d4 Ng8 3. Bf4 f6 4. e5 f5 5. h4 b6 6. h5 Kf7 7. h6 gxh6 8. Qh5+ Kg7 9. Qf7+ Kxf7 10. Nh3 h5");
@@ -54,15 +66,6 @@ class App {
 			onDrop: (...args: any[]) => this.onDrop.apply(this, args),
 			onSnapEnd: (...args: any[]) => this.onSnapEnd.apply(this, args)
 		});
-
-		// let that = this;
-		// let movea = that.engine.findBestMoveParallel(that.game.fen(), 2000);
-
-		// movea.then((move: string) => {
-		// 	console.log("The best move was: " + move);
-		// 	that.game.move(move);
-		// 	that.board.position(that.game.fen());
-		// })
 
 	}
 
@@ -110,9 +113,15 @@ class App {
 			  alert("Gmae over!");
 		  }
 
+
+
+
 		  // let move = that.engine.findBestMove(that.game.fen(), 1);
 		  // let movea = that.engine.findBestMoveAsync(that.game.fen(), 3000);
-		  let movea = that.engine.findBestMoveParallel(that.game.fen(), 5000);
+		  // let movea = that.engine.findBestMoveParallel(that.game.fen(), 100);
+		  //let movea = that.engine.findBestMoveAlphaBeta(that.game.fen(), 500);
+
+		  let movea = that.engine.getBestMove(that.game.fen());
 
 		  movea.then((move: string) => {
 			  console.log("The best move was: " + move);

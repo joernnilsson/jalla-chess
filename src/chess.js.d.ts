@@ -1,6 +1,6 @@
 
 
-export interface move88{
+export interface Move88{
 	color: string;
 	flags: number;
 	from: number;
@@ -23,8 +23,11 @@ export default class Chess{
 	turn(): string;
 
 	// Extended hp version
-	generate_moves(): move88[];
-	make_move(move: move88);
+	generate_moves(): Move88[];
+	make_move(move: Move88): void;
+	make_pretty(move: Move88): string;
+	move_to_san(move: Move88): string;
+	undo_move(): void;
 
 }
 

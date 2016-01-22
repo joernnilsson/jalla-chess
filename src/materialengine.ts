@@ -13,11 +13,14 @@ import {SimulatorTaskExecutor} from "./TaskExecutor";
 import {evaluator} from "./MaterialEvaluator";
 import {Node} from "./GameTree";
 import {WorkerPool} from "./WorkerPool";
+import {Engine} from "./engine";
+import {Evaluator} from "./Evaluator";
+
+
 
 import * as jquery from "jquery";
 
-
-
+declare var $: any;
 
 interface Move {
 	from: any;
@@ -60,14 +63,14 @@ class TreeNode {
 
 
 
-
-export class MaterialEngine {
+export class MaterialEngine<T extends Evaluator> extends Engine<T> {
 
 	tree: TreeNode;
 	simulator: Chess;
 	pool: WorkerPool;
 
 	constructor(){
+		super();
 		this.simulator = new Chess();
 		// this.pool = new WorkerPool(1, true);
 		this.pool = new WorkerPool(8, false);
@@ -124,6 +127,95 @@ export class MaterialEngine {
 		return fen.split(" ")[1];
 	}
 
+	alphaBeta(node: Node, depth: number, alpha: number, beta: number, maximizingPlayer: boolean): number{
+		if(depth == 0 /*|| game over */){
+			return evaluator(this.sim(node.fen)).numeric;
+		}
+
+		// Create child nodes
+		let sim = this.sim(node.fen);
+		let moves = sim.moves();
+		let turn = sim.turn();
+		node.children = moves.map((m: string): Node => {
+			sim.load(node.fen);
+			sim.move(m);
+			let c = Node.create(sim.fen(), m, null, node);
+			return c;
+		});
+
+		// Generate line
+		let line = (n: Node): string => {
+			if (n.moveTo)
+				return line(n.parent) + " " + n.moveTo;
+			return "... ";
+		}
+
+		// collect equal scores and choose randomly
+		if(maximizingPlayer){
+			// v: best so far
+			let v = -1e6;
+			for (let child of node.children){
+				let childScore = this.alphaBeta(child, depth - 1, alpha, beta, false);
+				// v = Math.max(v, childScore);
+				if(childScore > v){
+					v = childScore;
+					node.bestMove = { move: child, score: new NumericScore(childScore) };
+				}
+				alpha = Math.max(alpha, v);
+				if(beta <= alpha){
+					console.log("A: Cutting off at move: " + line(child) + ", depth:" + depth + " v: "+v);
+					break; /* cut off */
+				}
+			}
+			// Did not cut off
+			return v;
+		}else{
+			let v = 1e6;
+			for (let child of node.children) {
+				// v = Math.min(v, this.alphaBeta(child, depth - 1, alpha, beta, true));
+				let childScore = this.alphaBeta(child, depth - 1, alpha, beta, true);
+				if (childScore < v) {
+					v = childScore;
+					node.bestMove = { move: child, score: new NumericScore(childScore) };
+				}
+				beta = Math.min(beta, v);
+				if(beta <= alpha){
+					console.log("B: Cutting off at move: " + line(child) + ", depth:" + depth + " v:"+v);
+					break; /* cut off */
+				}
+			}
+			return v;
+		}
+
+	}
+
+		// Generate line
+	line(n: Node): string {
+
+		if(n.bestMove){
+			return n.moveTo + " " + this.line(n.bestMove.move);
+		}else{
+			return n.moveTo;
+		}
+	}
+
+	findBestMoveAlphaBeta(fen: string, timeToThink: number): Promise<string> {
+		let deferred = new Deferred<string>();
+
+		let node = Node.create(fen, null, null, null);
+		let bestScore = this.alphaBeta(node, 4, -1e6, 1e6, true);
+		console.log("Best score: "+bestScore);
+		console.log("Line: " + this.line(node.bestMove.move));
+
+		deferred.resolve(node.bestMove.move.moveTo);
+
+		return deferred.getPromise();
+	}
+
+	getBestMove(fen: string): Promise<string> {
+		return this.findBestMoveParallel(fen, 3000);
+	}
+
 	findBestMoveParallel(fen: string, timeToThink: number): Promise<string>{
 		let engine = this;
 		let deferred = new Deferred<string>();
@@ -167,9 +259,23 @@ export class MaterialEngine {
 		}
 
 
+
 		let maxDepth = 100;
 		let nodesEvaluated = 0;
 		let maxDepthEvaluated = 0;
+
+		let printStats = () => {
+			let engineStats = `Positions evaluated: ${nodesEvaluated}, deepest line: ${maxDepthEvaluated}`;
+			// console.log(engineStats);
+			$("#engine-stats").text(engineStats);
+		}
+
+		let statsTimerFn = () => {
+			printStats();
+			statsTimer = setTimeout(statsTimerFn, 100);
+		};
+		let statsTimer: any = setTimeout(statsTimerFn, 100);
+	
 		let onNodeEvaluated = (node: Node) => {
 
 			// Set the parent reference correctly
@@ -220,15 +326,16 @@ export class MaterialEngine {
 					// Time is up, return the best move
 					// engine.visualize(node);
 					printBestPath(node);
+					clearTimeout(statsTimer);
 					deferred.resolve(node.bestMove.move.moveTo);
 				}, timeToThink);
 
 			}).catch((e) => { console.error(e); });
 
+
+
 		let printBestPath = (node: Node) => {
-			let engineStats = `Nodes evaluated: ${nodesEvaluated}, deepest line: ${maxDepthEvaluated}`;
-			console.log(engineStats);
-			// jquery("#engine-stats").text(engineStats);	
+			printStats;
 			let str = "Moves: (" + node.score.numeric + "/" + node.bestMove.score.numeric + ") ";
 			let n = node.bestMove.move;
 			while (n != null) {

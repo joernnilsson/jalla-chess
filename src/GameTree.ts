@@ -1,10 +1,33 @@
 "use strict"
 
 import {Score, DrawScore, MateInScore, NumericScore, WonScore} from "./score";
+import {default as Chess, Move88} from "chess.js";
+
+interface BestMove88 {
+	score: Score;
+	move: Node88;
+}
 
 interface BestMove{
 	score: Score;
 	move: Node;
+}
+
+export class Node88 {
+	moveTo: Move88;
+	fen: string;
+	bestMove: BestMove88;
+	parent: Node88;
+	children: Node88[];
+
+	// debug
+	san: string;
+
+	constructor(fen: string, moveTo: Move88, parent: Node88) {
+		this.moveTo = moveTo;
+		this.fen = fen;
+		this.parent = parent;
+	}
 }
 
 export class Node {
