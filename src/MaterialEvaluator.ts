@@ -1,21 +1,32 @@
 "use strict"
 
 
-import Chess from "chess.js";
+import {default as Chess, Move88} from "chess.js";
 import {Score, DrawScore, MateInScore, NumericScore, WonScore} from "./score";
 
-export function evaluator(sim: Chess): Score {
+/*
+Optimization ideas:
+- Dont test for draw or win, may be implicit when moves.length = 0.
 
+*/
+
+// Should not modify sim
+export function evaluator(sim: Chess, moves?: Move88[]): Score {
+	if(typeof(window) != "undefined") window["p_evaluate"]++;
 	let turn = sim.turn();
-	let fen = sim.fen();
+	moves = moves || sim.generate_moves();
+	// let fen = sim.fen();
 
-	if (sim.in_draw()) {
-		return new DrawScore();
-	} else if (sim.in_checkmate()) {
-		return new WonScore(turn == "w" ? "b" : "w");
-		// return new WonScore(turn);
+	if(moves.length == 0){
+		// Game over
+		if (sim.in_draw()) {
+			return new DrawScore();
+		} else if (sim.in_checkmate()) {
+			return new WonScore(turn == "w" ? "b" : "w");
+		}
 	}
-		// Count material
+
+	// Count material
 	let pw = 0;
 	let pb = 0;
 
@@ -33,14 +44,32 @@ export function evaluator(sim: Chess): Score {
 		return 0;
 	};
 
-	for (let p of fen) {
-		if (p == " ") break;
-		let value = val(p);
-		if (p.toUpperCase() == p) pw += value;
-		else pb += value;
-	}
+	let board = sim.get_board();
+    for (var i = 0; i <= 119; i++) {
+		if (board[i] == null) {
+			continue;
+		} else {
+			var color = board[i].color;
+			var piece = board[i].type;
+			let value = val(board[i].type);
+			if (color == "w") pw += value;
+			else pb += value;
+		}
 
-	return new NumericScore(pw - pb);
+		if ((i + 1) & 0x88) {
+			// Should this be 7?
+			i += 8;
+		}
+    }
+
+	// for (let p of fen) {
+	// 	if (p == " ") break;
+	// 	let value = val(p);
+	// 	if (p.toUpperCase() == p) pw += value;
+	// 	else pb += value;
+	// }
+
+	return new NumericScore(pw - pb/*);// */ + ((Math.random() - 0.5) / 1000.0));
 };
 
 // export = evaluate;

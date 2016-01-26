@@ -22,6 +22,7 @@ export class Node88 {
 
 	// debug
 	san: string;
+	score: number;
 
 	constructor(fen: string, moveTo: Move88, parent: Node88) {
 		this.moveTo = moveTo;

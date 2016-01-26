@@ -15,11 +15,15 @@ import {EvaluatorMaterialCounter} from "./EvaluatorMaterialCounter";
 
 import {EngineAlphaBeta} from "./EngineAlphaBeta";
 import {EngineAlphaBetaHp} from "./EngineAlphaBetaHp";
+import {EngineAlphaBetaHpParallel} from "./EngineAlphaBetaHpParallel";
 import {EngineMinMaxParallel} from "./EngineMinMaxParallel";
 
 import {MaterialEngine} from "./materialengine";
 
-
+// Testing
+import {TaskWorkerPool} from "./TaskWorkerPool";
+import {TaskDef} from "./WorkerTask";
+import {WorkerTaskABHPP} from "./WorkerTaskABHPP";
 
 // TODO I think this is a hack (you are correct, it depends on transpiling to es5/commonjs)
 declare var require: any;
@@ -29,9 +33,11 @@ class App {
 	board: ChessBoard;
 	game: Chess;
 	engine: Engine<Evaluator>;
+	engine2: Engine<Evaluator>;
+	engine3: Engine<Evaluator>;
 	chessComClient: ChessComClient;
 
-	constructor(){
+	constructor() {
 		console.log("Constructing app");
 
 		// Chess.com client
@@ -43,13 +49,24 @@ class App {
 		// this.engine = new MaterialEngine();
 
 		// this.engine = new EngineMinMaxParallel<EvaluatorMaterialCounter>();
-		// this.engine = new EngineAlphaBeta<EvaluatorMaterialCounter>();
+		this.engine3 = new EngineAlphaBetaHpParallel<EvaluatorMaterialCounter>();
+		this.engine2 = new EngineAlphaBeta<EvaluatorMaterialCounter>();
 		this.engine = new EngineAlphaBetaHp<EvaluatorMaterialCounter>();
 
 		// this.game.load_pgn("1. e4 Nh6 2. d4 Ng8 3. Bf4 f6 4. e5 f5 5. h4 b6 6. h5 Kf7 7. h6 gxh6 8. Qh5+ Kg7 9. Qf7+ Kxf7 10. Nh3 h5 11. Be2 Ke8 12. Bxh5#");
 		// this.game.load_pgn("1. e4 Nh6 2. d4 Ng8 3. Bf4 f6 4. e5 f5 5. h4 b6 6. h5 Kf7 7. h6 gxh6 8. Qh5+ Kg7 9. Qf7+ Kxf7 10. Nh3 h5");
 		// this.game.load_pgn("1. e4 a6 2. d4 f6 3. f4 g5 4. Qh5#");
 		// this.game.load_pgn("1. e4 a6 2. d4 f6 ");
+
+
+
+		// let tt: WorkerTaskABHPP = new WorkerTaskABHPP({test: "abc"});
+		// let pool: TaskWorkerPool = new TaskWorkerPool(1, true);
+		// let out: Promise<any> = pool.enqueueTask(tt);
+		// out.then((res) => {
+		// 	console.log("Got response:");
+		// 	console.log(res);
+		// })
 
 
 
@@ -121,7 +138,8 @@ class App {
 		  // let movea = that.engine.findBestMoveParallel(that.game.fen(), 100);
 		  //let movea = that.engine.findBestMoveAlphaBeta(that.game.fen(), 500);
 
-		  let movea = that.engine.getBestMove(that.game.fen());
+		  // let movet = that.engine2.getBestMove(that.game.fen());
+		  let movea = that.engine.getBestMove(that.game.fen(), 3000);
 
 		  movea.then((move: string) => {
 			  console.log("The best move was: " + move);

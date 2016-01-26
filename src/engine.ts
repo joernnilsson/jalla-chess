@@ -5,6 +5,6 @@ import {Evaluator} from "./Evaluator";
 
 export abstract class Engine <T extends Evaluator> {
 
-	abstract getBestMove(fen: string): Promise<string>;
+	abstract getBestMove(fen: string, timeToThink: number): Promise<string>;
 
 }

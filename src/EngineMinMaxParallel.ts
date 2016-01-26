@@ -39,7 +39,7 @@ export class EngineMinMaxParallel<T extends Evaluator> extends Engine<T> {
 		return fen.split(" ")[1];
 	}
 	
-	getBestMove(fen: string): Promise<string> {
+	getBestMove(fen: string, timeToThink: number): Promise<string> {
 		return this.findBestMoveParallel(fen, 3000);
 	}
 

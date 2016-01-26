@@ -212,7 +212,7 @@ export class MaterialEngine<T extends Evaluator> extends Engine<T> {
 		return deferred.getPromise();
 	}
 
-	getBestMove(fen: string): Promise<string> {
+	getBestMove(fen: string, timeToThink: number): Promise<string> {
 		return this.findBestMoveParallel(fen, 3000);
 	}
 

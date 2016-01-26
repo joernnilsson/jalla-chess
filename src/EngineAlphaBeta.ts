@@ -43,14 +43,20 @@ export class EngineAlphaBeta<T extends Evaluator> extends Engine<T> {
 		}
 	}
 
-	getBestMove(fen: string): Promise<string> {
+	fenToTurn(fen: string): string {
+		return fen.split(" ")[1];
+	}
+
+	getBestMove(fen: string, timeToThink: number): Promise<string> {
+		let start = new Date().getTime();
 		let deferred = new Deferred<string>();
 
 		let node = Node.create(fen, null, null, null);
-		let bestScore = this.alphaBeta(node, 4, -1e6, 1e6, true);
+		let bestScore = this.alphaBeta(node, 2, -1e6, 1e6, this.fenToTurn(fen) == "w");
 		console.log("Best score: " + bestScore);
-		console.log("Line: " + this.line(node.bestMove.move));
+		// console.log("Line: " + this.line(node.bestMove.move));
 
+		console.log("Computation time: " + (((new Date().getTime()) - start) / 1000.0));
 		deferred.resolve(node.bestMove.move.moveTo);
 
 		return deferred.getPromise();
