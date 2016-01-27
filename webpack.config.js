@@ -5,7 +5,7 @@ var ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 module.exports = {
 	entry: {
-		entry: "./tsc/entry.js"
+		entry: "./src/entry.js"
 			// ,tsworker: "./src/tsworker"
 	},
 
@@ -50,7 +50,11 @@ module.exports = {
 
 			{
 				test: /\.ts$/,
-				loader: 'awesome-typescript-loader'
+				// loader: 'awesome-typescript-loader'
+				loaders: [
+					'babel-loader?presets=es2015',
+					'awesome-typescript-loader'
+				]
 			},
 
 			{
