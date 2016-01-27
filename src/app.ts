@@ -7,7 +7,7 @@
 import ChessBoard from "chessboardjs";
 import Chess from "chess.js";
 import "chessboardjs/www/css/chessboard.css";
-import {ChessComClient} from "./ChessComClient";
+// import {ChessComClient} from "./ChessComClient";
 import {Engine} from "./engine";
 
 import {Evaluator} from "./Evaluator";
@@ -35,7 +35,7 @@ class App {
 	engine: Engine<Evaluator>;
 	engine2: Engine<Evaluator>;
 	engine3: Engine<Evaluator>;
-	chessComClient: ChessComClient;
+	// chessComClient: ChessComClient;
 
 	constructor() {
 		console.log("Constructing app");
