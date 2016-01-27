@@ -1,4 +1,3 @@
-/// <reference path="xhr-promise-es6.d.ts" />
 
 import XMLHttpRequestPromise from "xhr-promise-es6";
 import {Deferred} from "./Deferred";
