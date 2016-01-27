@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "awesome-typescript-loader": "^0.15.9",
-    "chess.js": "git+ssh://git@github.com:joernnilsson/chess.js.git",
+    "chess.js": "git+https://github.com/joernnilsson/chess.js.git",
     "chessboardjs": "0.0.1",
     "css-loader": "^0.23.0",
     "d3": "3.5.12",
