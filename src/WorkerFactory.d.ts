@@ -7,7 +7,7 @@ export interface TaskWorker {
 	state: number;
 	postMessage(message: any): void;
 	addEventListener(ev: string, cb: (event: any) => void);
-
+	terminate(): void;
 }
 
 export class WorkerFactory {

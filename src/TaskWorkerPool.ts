@@ -17,7 +17,8 @@ declare var require: any;
 class ProcessingTask {
 	id: number;
 	deferred: Deferred<any>;
-	task: Task
+	task: Task;
+    workerId: number;
 	static getFor(task: Task): ProcessingTask {
 		let pt = new ProcessingTask();
 		pt.id = task.id;
@@ -80,6 +81,10 @@ class ForegroundTaskWorker implements TaskWorker {
 		if (ev == "error")
 			this.errCb = cb;
 	}
+
+    terminate(): void {
+        // TODO not implemented
+    }
 }
 
 
@@ -124,34 +129,35 @@ export class TaskWorkerPool {
 			let __this = this;
 
 			// Import constructor. This only works because we happen to transpile to es5/commonjs.
-			let TWC = require("worker?name=taskworker-[hash].js!./TaskWorker");
+			let TWC = require("worker?name=taskworker.js!./TaskWorker");
 			for (var i = 0; i < threads; i++){
-				// Block scope hack. Should switch to es6 asap.
-				((idx: number) => {
-					//let taskWorker = WorkerFactory.create2();
-					let taskWorker: TaskWorker = new TWC();
-
-					taskWorker.id = idx;
-					taskWorker.state = 0;
-					taskWorker.addEventListener("message", (event) => {
-						__this.resultReceived(idx, event.data);
-						taskWorker.state = 0;
-						__this.processQueue(idx);
-					});
-					taskWorker.addEventListener("error", (error) => {
-						__this.errorReceived(idx, error);
-						taskWorker.state = 0;
-						__this.processQueue(idx);
-						});
-						__this.pool.push(taskWorker);
-				})(i);
-
+				this.pool.push(this.createWorker(i));
 			}
 		}
 
 
 		console.log("test");
 
+	}
+
+	private createWorker(idx: number): TaskWorker {
+		let TWC = require("worker?name=taskworker.js!./TaskWorker");
+		//let taskWorker = WorkerFactory.create2();
+		let taskWorker: TaskWorker = new TWC();
+
+		taskWorker.id = idx;
+		taskWorker.state = 0;
+		taskWorker.addEventListener("message", (event) => {
+			this.resultReceived(idx, event.data);
+			taskWorker.state = 0;
+			this.processQueue(idx);
+		});
+		taskWorker.addEventListener("error", (error) => {
+			this.errorReceived(idx, error);
+			taskWorker.state = 0;
+			this.processQueue(idx);
+		});
+		return taskWorker;
 	}
 
 	private getTaskCounter(): number {
@@ -183,6 +189,17 @@ export class TaskWorkerPool {
 
 	disable() {
 		this.queue.length = 0;
+
+        // Terminate working threads and create new one
+		for(let i=0; i<this.pool.length; i++){
+			let worker = this.pool[i];
+			if(worker.state != 0){
+				console.log("Terminating thread "+ i);
+				worker.terminate();
+				this.pool[i] = this.createWorker(i);
+			}
+		}
+
 		this.runningTasks = {};
 		this.acceptTasks = false;
 	}
@@ -221,6 +238,7 @@ export class TaskWorkerPool {
 
 	private dispatchTask(pt: ProcessingTask, worker: TaskWorker): void {
 		workerLog(worker.id, "Executing task: " + pt.id);
+        pt.workerId = worker.id;
 		worker.postMessage(pt.task);
 		worker.state = 1;
 		this.runningTasks[pt.id] = pt;

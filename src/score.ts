@@ -34,7 +34,7 @@ export class WonScore extends Score {
 		this.numeric = this.getComparableScore();
 	}
 	getComparableScore() {
-		return this.side == 'w' ? 1e9 : -1e9;
+		return this.side == 'w' ? 1e6 : -1e6;
 	}
 }
 

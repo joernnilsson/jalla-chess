@@ -12,6 +12,9 @@ import {Engine} from "./engine";
 import {Evaluator} from "./Evaluator";
 import {EvaluatorMaterialCounter} from "./EvaluatorMaterialCounter";
 
+
+import {evaluator} from "../src/MaterialEvaluator";
+
 import {EngineAlphaBeta} from "./EngineAlphaBeta";
 import {EngineAlphaBetaHp} from "./EngineAlphaBetaHp";
 import {EngineAlphaBetaHpParallel} from "./EngineAlphaBetaHpParallel";
@@ -100,10 +103,21 @@ class App {
 
 	}
 
-	load(pgn: string){
+	loadPgn(pgn: string){
 		this.game.load_pgn(pgn);
 		this.board.position(this.game.fen());
 	}
+
+	load(fen: string){
+		this.game.load(fen);
+		this.board.position(this.game.fen());
+	}
+
+
+    evaluate(){
+
+        console.log("\"" + this.game.fen() + "\" (" + evaluator(this.game).numeric + ")");
+    }
 
 	// do not pick up pieces if the game is over
 	// only pick up pieces for White
@@ -142,6 +156,7 @@ class App {
 		  // game over
 		  if (possibleMoves.length === 0) {
 			  alert("Gmae over!");
+			  return;
 		  }
 
 
@@ -153,7 +168,7 @@ class App {
 		  //let movea = that.engine.findBestMoveAlphaBeta(that.game.fen(), 500);
 
 		  // let movet = that.engine2.getBestMove(that.game.fen());
-		  let movea = that.engine.getBestMove(that.game.fen(), 3000);
+		  let movea = that.engine.getBestMove(that.game.fen(), 5000);
 
 		  movea.then((move: string) => {
 			  console.log("The best move was: " + move);

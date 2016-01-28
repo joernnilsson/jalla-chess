@@ -36,10 +36,6 @@ export default class Chess{
 	attacked(color: string, square): boolean;
 	king_attacked(color: string): boolean;
 
-	underlaying():any;
-	rank(s: number): number;
-	file(s: number): number;
-
 }
 
 interface Move {

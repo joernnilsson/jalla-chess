@@ -56,6 +56,9 @@ class ForegroundTaskWorker implements TaskWorker {
 		if (ev == "error")
 			this.errCb = cb;
 	}
+	terminate():void{
+		console.log("Cannot terminate main thread");
+	}
 }
 
 function foreground(task: WorkerTask){

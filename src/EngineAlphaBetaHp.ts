@@ -10,7 +10,7 @@ import {SimulatorTaskExecutor} from "./TaskExecutor";
 import {evaluator} from "./MaterialEvaluator";
 import {Node88} from "./GameTree";
 import {TaskWorkerPool} from "./TaskWorkerPool";
-import {WorkerTaskAB} from "./WorkerTaskAB";
+import {WorkerTaskAB, ResponseABHPP, EventResponseABHPP} from "./WorkerTaskAB";
 
 import {Engine} from "./engine";
 import {Evaluator} from "./Evaluator";
@@ -99,9 +99,10 @@ export class EngineAlphaBetaHp<T extends Evaluator> extends Engine<T> {
 		// TODO depth = 1 may not finish :(
 
 		let d = 1;
-		let maxd = 4;
+		let maxd = 10;
 		let bestScore = 0;
 		let bestMove: string = "..";
+		let bestVariation: Move88[] = [];
 		let abort = false;
 		this.pool.enable();
 
@@ -120,15 +121,18 @@ export class EngineAlphaBetaHp<T extends Evaluator> extends Engine<T> {
 
 
 
-		let fcalc = (depth: number): Promise<any> => {
-			let task = new WorkerTaskAB({ node: root, alpha: -1e9, beta: 1e9, depth: depth, maximizing: this.fenToTurn(fen) == "w" });
+		let fcalc = (depth: number, hint: Move88[]): Promise<any> => {
+			let task = new WorkerTaskAB({ node: root, alpha: -1e9, beta: 1e9, depth: depth, maximizing: this.fenToTurn(fen) == "w", hint: hint});
 			let resp: Promise<any> = this.pool.enqueueTask(task);
-			resp.then((m: any) => {
-				console.log("Finished search at depth " + depth + ", best move: " + m.data);
+			resp.then((m: EventResponseABHPP) => {
+				console.log("Finished search at depth " + depth + ", best move: " + m.data.san);
 				d = depth;
-				bestMove = m.data;
+				bestMove = m.data.san;
+				bestScore = m.data.score;
+				let pv = m.data.principalVariation;
+				bestVariation = pv;
 				if(!abort && depth < maxd){
-					fcalc(depth + 1);
+					fcalc(depth + 1, pv);
 				} else {
 					// Temp
 					// abort = true;
@@ -156,14 +160,24 @@ export class EngineAlphaBetaHp<T extends Evaluator> extends Engine<T> {
 			return resp;
 		}
 
-		let pmove: Promise<any> = fcalc(1);
+		let pmove: Promise<any> = fcalc(1, []);
 
 		let timeout = setTimeout(() => {
 
 			abort = true;
 			this.pool.disable();
 			deferred.resolve(bestMove);
+
+			let sim = this.sim(root.fen);
+			let line = bestVariation.map((m) => {
+				let san = sim.move_to_san(m);
+				sim.make_move(m);
+				return san;
+			}).join(" ");
+
 			console.log("Computation time: " + (((new Date().getTime()) - start) / 1000.0));
+			console.log("Principal variation: " +  line + " (" + bestScore + ")")
+			console.log("BestMove: " +  bestMove)
 
 			clearTimeout(statsTimer);
 			printStats();

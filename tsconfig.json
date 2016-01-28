@@ -4,7 +4,7 @@
         "target": "es6",
         "noImplicitAny": false,
         "outDir": "tsc",
-        "rootDir": "src",
+        "rootDir": ".",
         "sourceMap": true,
         "watch": false
     },
