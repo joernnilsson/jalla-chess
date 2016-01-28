@@ -8,8 +8,6 @@ import {Deferred} from "./Deferred";
 import {WorkerTaskABHPP} from "./WorkerTaskABHPP";
 import {WorkerTaskAB} from "./WorkerTaskAB";
 
-import "worker?name=taskworker-[hash].js!./taskworker";
-
 // TODO remove
 import Chess from "chess.js";
 
@@ -126,7 +124,7 @@ export class TaskWorkerPool {
 			let __this = this;
 
 			// Import constructor. This only works because we happen to transpile to es5/commonjs.
-			let TWC = require("worker?name=taskworker-[hash].js!./taskworker");
+			let TWC = require("worker?name=taskworker-[hash].js!./TaskWorker");
 			for (var i = 0; i < threads; i++){
 				// Block scope hack. Should switch to es6 asap.
 				((idx: number) => {
