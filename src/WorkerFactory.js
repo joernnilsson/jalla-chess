@@ -2,7 +2,7 @@
 
 var create = function(){
 
-	var Prot = require("worker!./jsworker.js");
+	var Prot = require("worker?name=worker1-[hash].js!./jsworker.js");
 	var worker = new Prot();
 	return worker;
 
@@ -10,7 +10,7 @@ var create = function(){
 
 var create2 = function(){
 
-	var Prot = require("worker!./taskjsworker.js");
+	var Prot = require("worker?name=worker2-[hash].js!./taskjsworker.js");
 	var worker = new Prot();
 	return worker;
 

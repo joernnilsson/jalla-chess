@@ -2,7 +2,8 @@
 "use strict"
 
 import {Task} from "./WorkerTask";
-import {WorkerFactory, TaskWorker} from "./WorkerFactory";
+//import {WorkerFactory, TaskWorker} from "./WorkerFactory";
+import {TaskWorker} from "./WorkerFactory";
 import {Deferred} from "./Deferred";
 import {WorkerTaskABHPP} from "./WorkerTaskABHPP";
 import {WorkerTaskAB} from "./WorkerTaskAB";
@@ -10,6 +11,8 @@ import {WorkerTaskAB} from "./WorkerTaskAB";
 // TODO remove
 import Chess from "chess.js";
 
+// TODO This is a hack, it depends on transpiling to es5/commonjs
+declare var require: any;
 
 class ProcessingTask {
 	id: number;
@@ -119,10 +122,15 @@ export class TaskWorkerPool {
 
 		}else{
 			let __this = this;
+
+			// Import constructor. This only works because we happen to transpile to es5/commonjs.
+			let TWC = require("worker?name=taskworker-[hash].js!./taskworker");
 			for (var i = 0; i < threads; i++){
 				// Block scope hack. Should switch to es6 asap.
 				((idx: number) => {
-					let taskWorker = WorkerFactory.create2();
+					//let taskWorker = WorkerFactory.create2();
+					let taskWorker: TaskWorker = new TWC();
+
 					taskWorker.id = idx;
 					taskWorker.state = 0;
 					taskWorker.addEventListener("message", (event) => {

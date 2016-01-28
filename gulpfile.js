@@ -45,6 +45,17 @@ function clean() {
   return del(['dist/**/*']);
 }
 
+gulp.task("webpack", function(callback) {
+  // run webpack
+  webpack(require('./webpack.config.js')
+      , function(err, stats) {
+    if(err) throw new gutil.PluginError("webpack", err);
+    gutil.log("[webpack]", stats.toString({
+      // output options
+    }));
+    callback();
+  });
+});
 
 // Clean old dist files
 gulp.task('clean', clean);

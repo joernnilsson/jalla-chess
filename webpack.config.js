@@ -6,15 +6,16 @@ var ExtractTextPlugin = require('extract-text-webpack-plugin');
 module.exports = {
 	entry: {
 		entry: "./src/entry.js"
+		// , tsworker: "awesome-typescript-loader?instanceName=worker&noLib=true!./src/taskworker"
 			// ,tsworker: "./src/tsworker"
 	},
 
 	resolve: {
-		extensions: ['', '.ts', '.tsx', '.tsw', '.webpack.js', '.web.js', '.js']
+		extensions: ['', '.ts', '.tsx', '.webpack.js', '.web.js', '.js']
 	},
 
 	// Source maps support (or 'inline-source-map' also works)
-	devtool: 'inline-source-map',
+	devtool: 'source-map',
 
 	output: {
 		publicPath: '',
@@ -57,15 +58,15 @@ module.exports = {
 				]
 			},
 
-			{
-				test: /\.tsx$/,
-				loaders: [
-					// 'worker',
-					// 'babel-loader?presets=es2015',
-					'file?name=[name].[ext]',
-					'awesome-typescript-loader?instanceName=worker&noLib=true'
-				]
-			},
+			//{
+			//	test: /\.tsx$/,
+			//	loaders: [
+			//		// 'worker',
+			//		// 'babel-loader?presets=es2015',
+			//		'file?name=[name].[ext]',
+			//		'awesome-typescript-loader?instanceName=worker&noLib=true'
+			//	]
+			//},
 
 			{
 				test: /\.(jpe?g|png|gif|svg)$/i,

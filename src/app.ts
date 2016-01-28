@@ -1,7 +1,6 @@
 /// <reference path="chess.js.d.ts" />
 /// <reference path="chessboardjs.d.ts" />
 
-
 // import {Chess} from "chess.js";
 // import * as ChessBoard from "chessboardjs";
 import ChessBoard from "chessboardjs";
@@ -28,6 +27,9 @@ import {WorkerTaskABHPP} from "./WorkerTaskABHPP";
 
 // Worker testing
 // import "./taskworker";
+//import "file?name=[name].[ext]!awesome-typescript-loader?instanceName=worker&noLib=false!./taskworker";
+//import "worker?name=taskworker.js!awesome-typescript-loader?instanceName=worker&noLib=false!./taskworker";
+
 
 
 // TODO I think this is a hack (you are correct, it depends on transpiling to es5/commonjs)
@@ -72,6 +74,13 @@ class App {
 		// 	console.log("Got response:");
 		// 	console.log(res);
 		// })
+
+
+		// Test ts task worker
+		// NOTE This only works because we happen to transpile to es5 with commonjs modules
+		//let TWC = require("worker?name=taskworker-[hash].js!./taskworker");
+		//let tw: Worker = new TWC();
+		//tw.postMessage("Batman");
 
 
 
