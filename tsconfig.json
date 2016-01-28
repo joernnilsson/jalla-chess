@@ -12,9 +12,5 @@
         "node_modules",
         "src.backup",
         "src/tsworker.ts"
-    ],
-    "awesomeTypescriptLoaderOptions": {
-        "instanceName": "app",
-        "useBabel": false
-    }
+    ]
 }

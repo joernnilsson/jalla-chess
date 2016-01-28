@@ -9,13 +9,7 @@
         "watch": false,
         "noLib": true
     },
-    "files": [
-        "src/tsworker.ts"
-    ],
     "exclude": [
         "node_modules",
-    ],
-    "awesomeTypescriptLoaderOptions": {
-        "instanceName": "worker"
-    }
+    ]
 }

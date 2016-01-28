@@ -10,7 +10,7 @@ module.exports = {
 	},
 
 	resolve: {
-		extensions: ['', '.ts', '.webpack.js', '.web.js', '.js']
+		extensions: ['', '.ts', '.tsx', '.tsw', '.webpack.js', '.web.js', '.js']
 	},
 
 	// Source maps support (or 'inline-source-map' also works)
@@ -53,7 +53,17 @@ module.exports = {
 				// loader: 'awesome-typescript-loader'
 				loaders: [
 					'babel-loader?presets=es2015',
-					'awesome-typescript-loader'
+					'awesome-typescript-loader?instanceName=app'
+				]
+			},
+
+			{
+				test: /\.tsx$/,
+				loaders: [
+					// 'worker',
+					// 'babel-loader?presets=es2015',
+					'file?name=[name].[ext]',
+					'awesome-typescript-loader?instanceName=worker&noLib=true'
 				]
 			},
 

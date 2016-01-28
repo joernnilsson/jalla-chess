@@ -25,6 +25,11 @@ import {TaskWorkerPool} from "./TaskWorkerPool";
 import {TaskDef} from "./WorkerTask";
 import {WorkerTaskABHPP} from "./WorkerTaskABHPP";
 
+
+// Worker testing
+// import "./taskworker";
+
+
 // TODO I think this is a hack (you are correct, it depends on transpiling to es5/commonjs)
 declare var require: any;
 
