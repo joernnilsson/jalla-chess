@@ -8,6 +8,8 @@ import {Deferred} from "./Deferred";
 import {WorkerTaskABHPP} from "./WorkerTaskABHPP";
 import {WorkerTaskAB} from "./WorkerTaskAB";
 
+import "worker?name=taskworker-[hash].js!./taskworker";
+
 // TODO remove
 import Chess from "chess.js";
 
