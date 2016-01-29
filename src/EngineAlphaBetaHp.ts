@@ -137,7 +137,7 @@ export class EngineAlphaBetaHp<T extends Evaluator> extends Engine<T> {
 
                     // Replace root
                     //root = m.data.tree;
-                    
+
                     console.log("starting search at d "+(depth + 1));
 					fcalc(depth + 1, pv);
 				} else {

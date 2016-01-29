@@ -29,7 +29,7 @@ export interface EventResponseABHPP {
 
 /*
 TODO:
-- Merge b and w logic
+* Merge b and w logic
 * Try not to do sim.generate_moves() on evaluate
 - Dont do generate_moves if children is already populated (What about pruned lines?)
 * Return principle variation
