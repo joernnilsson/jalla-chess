@@ -175,9 +175,9 @@ export class EngineAlphaBetaHp<T extends Evaluator> extends Engine<T> {
 				return san;
 			}).join(" ");
 
-			console.log("Computation time: " + (((new Date().getTime()) - start) / 1000.0));
-			console.log("Principal variation: " +  line + " (" + bestScore + ")")
-			console.log("BestMove: " +  bestMove)
+			console.log("E: Computation time: " + (((new Date().getTime()) - start) / 1000.0));
+			console.log("E: Principal variation: " +  line + " (" + bestScore + ")")
+			console.log("E: BestMove: " +  bestMove)
 
 			clearTimeout(statsTimer);
 			printStats();
@@ -191,116 +191,6 @@ export class EngineAlphaBetaHp<T extends Evaluator> extends Engine<T> {
 
 		return deferred.getPromise();
 	}
-
-	getBestMoves(fen: string, timeToThink: number): Promise<string> {
-		let start = new Date().getTime();
-		let deferred = new Deferred<string>();
-
-		let node = new Node88(fen, null, null);
-		// let bestScore = this.alphaBeta(node, 2, -1e9, 1e9, this.fenToTurn(fen) == "w");
-		
-
-		let d = 1;
-		let maxd = 5;
-		let bestScore = 0;
-		while(d <= maxd){
-			console.log("Searching depth: " + d);
-			bestScore = this.alphaBeta(node, d, -1e9, 1e9, this.fenToTurn(fen) == "w");
-			d++;
-		}
-		console.log("Best score: " + bestScore);
-
-		console.log("Computation time: " + (((new Date().getTime()) - start) / 1000.0));	
-		deferred.resolve(this.sim(fen).move_to_san(node.bestMove.move.moveTo));
-
-		return deferred.getPromise();
-	}
-
-	// disabled
-	alphaBeta(node: Node88, depth: number, alpha: number, beta: number, maximizingPlayer: boolean): number {
-		
-		let sim = this.sim(node.fen);
-		let moves = sim.generate_moves({ legal: false });
-		let turn = sim.turn();
-
-		if (depth == 0 || moves.length == 0) {
-			return evaluator(this.sim(node.fen)).numeric;
-		}
-
-		// Create child nodes if necessary (only at depth = 1)
-		if (!node.children) {
-			node.children = moves.map((m: Move88): Node88 => {
-				sim.make_move(m);
-				let c = new Node88(sim.fen(), m, node);
-				sim.undo_move();
-				// Debug
-				c.san = sim.move_to_san(m);
-				return c;
-			});
-		}
-
-
-
-		// TODO collect equal scores and choose randomly
-		if (maximizingPlayer) {
-			// v: best so far
-			let v = -1e9;
-			let idx = 0;
-			let bestIdx = -1
-			for (let child of node.children) {
-				let childScore = this.alphaBeta(child, depth - 1, alpha, beta, false);
-				// v = Math.max(v, childScore);
-				if (childScore > v) {
-					v = childScore;
-					node.bestMove = { move: child, score: new NumericScore(childScore) };
-					bestIdx = idx;
-				}
-				alpha = Math.max(alpha, v);
-				if (beta <= alpha) {
-					// console.log("A: Cutting off at move: " + this.line(child) + ", depth:" + depth + " v: " + v);
-					break; /* cut off */
-				}
-				idx++;
-			}
-			// Order list with pricipal first
-			if(bestIdx >= 0){
-				let n = node.children.splice(bestIdx, 1);
-				node.children.unshift(n[0]);
-			}
-
-			// Did not cut off
-			return v;
-		} else {
-			let v = 1e9;
-			let idx = 0;
-			let bestIdx = -1
-			for (let child of node.children) {
-				// v = Math.min(v, this.alphaBeta(child, depth - 1, alpha, beta, true));
-				let childScore = this.alphaBeta(child, depth - 1, alpha, beta, true);
-				if (childScore < v) {
-					v = childScore;
-					node.bestMove = { move: child, score: new NumericScore(childScore) };
-					bestIdx = idx;
-				}
-				beta = Math.min(beta, v);
-				if (beta <= alpha) {
-					// console.log("B: Cutting off at move: " + this.line(child) + ", depth:" + depth + " v:" + v);
-					break; /* cut off */
-				}
-				idx++;
-			}
-			// Order list with pricipal first
-			if (bestIdx >= 0) {
-				let n = node.children.splice(bestIdx, 1);
-				node.children.unshift(n[0]);
-			}
-			return v;
-		}
-
-	}
-
-
-
 
 
 }

@@ -24,8 +24,8 @@ onmessage = function(event) {
 
 	var taskDef = event.data;
 
-	console.log("Processing message:");
-	console.log(taskDef);
+	//console.log("Processing message:");
+	//console.log(taskDef);
 
 	// TODO do this using a module reesporting all tasks
 	var task = null;

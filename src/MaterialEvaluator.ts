@@ -37,10 +37,9 @@ var RANK_8 = 0;
 
 // Should not modify sim
 export function evaluator(sim: Chess, moves?: Move88[]): Score {
-	if(typeof(window) != "undefined") window["p_evaluate"]++;
+	if(typeof(self) != "undefined") self["p_evaluate"]++;
 	let turn = sim.turn();
 	moves = moves || sim.generate_moves();
-	// let fen = sim.fen();
 
 	if(moves.length == 0){
 		// Game over
