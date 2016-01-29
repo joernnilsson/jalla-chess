@@ -56,6 +56,8 @@ export class WorkerTaskAB extends Task{
 	}
 
     leaves: number;
+    dropped: number;
+    kept: number;
 
 	public process(sim: Chess): ResponseABHPP {
 
@@ -67,6 +69,8 @@ export class WorkerTaskAB extends Task{
 		self["p_move_to_san"] = 0;
 		self["p_evaluate"] = 0;
         this.leaves = 0;
+        this.dropped = 0;
+        this.kept = 0;
 
 
 		sim.load(this.params.node.fen);
@@ -83,6 +87,8 @@ export class WorkerTaskAB extends Task{
 		 console.log("W"+ this.params.depth + ":evaluate(): " + self["p_evaluate"]);
 		 console.log("W"+ this.params.depth + ":attacked(): " + self["p_attacked"]);
         console.log("W"+ this.params.depth + ":leaf nodes: " + this.leaves);
+        console.log("W"+ this.params.depth + ":dropped nodes: " + this.dropped);
+        console.log("W"+ this.params.depth + ":kept nodes: " + this.kept);
 		return {
 			san: san,
 			score: score,
@@ -118,19 +124,19 @@ export class WorkerTaskAB extends Task{
             childrenPrecompiled = false;
         }
 
-        // Consider last iteration's principal variation first
-		if(pv.length > 0){
-			// Try principle variation first
-			let hint = pv.shift();
-			let idx = moves.findIndex((m) => {
-				return m.to == hint.to
-					&& m.from == hint.from;
-			});
-			console.log("Moved pv up from idx " + idx);
-			let n: Move88[] = moves.splice(idx, 1);
-			moves.unshift(n[0]);
-
-		}
+        //// Consider last iteration's principal variation first
+		//if(pv.length > 0){
+		//	// Try principle variation first
+		//	let hint = pv.shift();
+		//	let idx = moves.findIndex((m) => {
+		//		return m.to == hint.to
+		//			&& m.from == hint.from;
+		//	});
+		//	console.log("Moved pv up from idx " + idx);
+		//	let n: Move88[] = moves.splice(idx, 1);
+		//	moves.unshift(n[0]);
+        //
+		//}
 
 
         let len = childrenPrecompiled ? node.children.length : moves.length;
@@ -192,11 +198,13 @@ export class WorkerTaskAB extends Task{
                     break;
 
                 // Comment out to keep a full tree
+                this.dropped += len - i;
                 break;
 
                 // console.log("A: Cutting off at move: " + this.line(child) + ", depth:" + depth + " v: " + v);
                 //break; /* cut off */
             }
+            this.kept++;
 
         }
 
@@ -207,74 +215,6 @@ export class WorkerTaskAB extends Task{
         }
 
         return maximizingPlayer ? alpha : beta;
-
-
-
-        //let stop = false;
-        //for (let move of moves) {
-        //
-        //    // Simulator state block start
-        //    sim.make_move(move);
-        //
-        //    // Filter illegal moves
-        //    if (sim.king_attacked(turn)) {
-        //        sim.undo_move();
-        //        continue;
-        //    }
-        //
-        //    let child = new Node88("", move, null);
-        //
-        //    if(!stop){
-        //
-        //        // Go deeper
-        //        let childScore = this.alphaBeta(sim, child, depth - 1, alpha, beta, !maximizingPlayer, pv);
-        //        child.score = childScore;
-        //
-        //        // Update alpha/beta
-        //        if(maximizingPlayer){
-        //            if (childScore > alpha) {
-        //                alpha = childScore;
-        //                node.bestMove = { move: child, score: new NumericScore(childScore) };
-        //            }
-        //        } else {
-        //            if (childScore < beta) {
-        //                beta = childScore;
-        //                node.bestMove = { move: child, score: new NumericScore(childScore) };
-        //            }
-        //        }
-        //
-        //    }
-        //
-        //    // Restore simulator
-        //    sim.undo_move();
-        //
-        //    // Simulator state block end
-        //
-        //
-        //    // Store child
-        //    node.children.push(child);
-        //
-        //    // Should we cut off?
-        //    if (!stop && beta <= alpha) {
-        //        stop = true;
-        //        // console.log("A: Cutting off at move: " + this.line(child) + ", depth:" + depth + " v: " + v);
-        //        //break; /* cut off */
-        //    }
-        //}
-        //
-        //// Found no legal moves, game over
-        //if (node.children.length == 0) {
-        //    let out = evaluator(sim, []).numeric;
-        //    return out;
-        //}
-        //
-        //return maximizingPlayer ? alpha : beta;
-        //
-        //
-
-
-
-
 
 
 

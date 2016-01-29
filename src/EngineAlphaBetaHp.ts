@@ -1,3 +1,4 @@
+import {AbMasterResult} from "./ABMasterWorker";
 "use strict";
 
 import {default as Chess, Move88} from "chess.js";
@@ -17,14 +18,16 @@ import {Evaluator} from "./Evaluator";
 
 import {visualize} from "./Node88Visualizer";
 
+// TODO This is a hack, it depends on transpiling to es5/commonjs
+declare var require: any;
+
 /*
 TODO
-- put in bg worker
-- clean up max/min-loops
-- make abortable
-- main thread should be master and cooridnate a shared transposition table
-- implement lazy smp (iterative deepening startin on different depths)
-- keep principle variation when iterating
+- follow principal variation
+- use refutation tables
+- use transposition tables
+
+
 
 */
 
@@ -78,7 +81,7 @@ export class EngineAlphaBetaHp<T extends Evaluator> extends Engine<T> {
 		return fen.split(" ")[1];
 	}
 
-	getBestMove(fen: string, timeToThink: number): Promise<string> {
+	getBestMoveO(fen: string, timeToThink: number): Promise<string> {
 		let start = new Date().getTime();
 		let deferred = new Deferred<string>();
 
@@ -99,7 +102,7 @@ export class EngineAlphaBetaHp<T extends Evaluator> extends Engine<T> {
 		// TODO depth = 1 may not finish :(
 
 		let d = 1;
-		let maxd = 10;
+		let maxd = 4;
 		let bestScore = 0;
 		let bestMove: string = "..";
 		let bestVariation: Move88[] = [];
@@ -198,6 +201,66 @@ export class EngineAlphaBetaHp<T extends Evaluator> extends Engine<T> {
 
 		return deferred.getPromise();
 	}
+
+
+    getBestMove(fen: string, timeToThink: number): Promise<string> {
+        let start = new Date().getTime();
+        let deferred = new Deferred<string>();
+
+        $('#timeout').css({width: 395}).animate({width: 0}, timeToThink, 'linear');
+
+        let bestResult: AbMasterResult;
+
+        if(typeof(self["abmaster"]) != "undefined"){
+            self["abmaster"].terminate();
+        }
+        let TWC = require("worker?name=ABMasterWorker.js!./ABMasterWorker");
+        let master: Worker = new TWC();
+
+        master.addEventListener("message", (event) => {
+            console.log("Got result");
+            console.log(event.data);
+            bestResult = event.data;
+            let engineStats = `Deepest line: ${bestResult.depth}`;
+            $("#engine-stats").text(engineStats);
+        });
+        master.addEventListener("error", (error) => {
+            console.error(error);
+        });
+
+        // Start the master thread
+        let root = new Node88(fen, null, null);
+        master.postMessage({
+            cmd: 'start',
+            node: root
+        });
+
+
+        let timeout = setTimeout(() => {
+
+            deferred.resolve(bestResult.san);
+
+            master.terminate();
+            // Keep a reference
+            //self["abmaster"] = master;
+
+            let sim = this.sim(root.fen);
+            let line = bestResult.principalVariation.map((m) => {
+                let san = sim.move_to_san(m);
+                sim.make_move(m);
+                return san;
+            }).join(" ");
+
+            console.log("E: Computation time: " + (((new Date().getTime()) - start) / 1000.0));
+            console.log("E: Principal variation: " +  line + " (" + bestResult.score + ")");
+            console.log("E: BestMove: " +  bestResult.score);
+
+
+
+        }, timeToThink);
+
+        return deferred.getPromise();
+    }
 
 
 }
