@@ -168,7 +168,7 @@ class App {
 		  //let movea = that.engine.findBestMoveAlphaBeta(that.game.fen(), 500);
 
 		  // let movet = that.engine2.getBestMove(that.game.fen());
-		  let movea = that.engine.getBestMove(that.game.fen(), 5000);
+		  let movea = that.engine.getBestMove(that.game.fen(), 8000);
 
 		  movea.then((move: string) => {
 			  console.log("The best move was: " + move);

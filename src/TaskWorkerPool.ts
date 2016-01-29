@@ -195,8 +195,8 @@ export class TaskWorkerPool {
 			let worker = this.pool[i];
 			if(worker.state != 0){
 				console.log("Terminating thread "+ i);
-				worker.terminate();
-				this.pool[i] = this.createWorker(i);
+				//worker.terminate();
+				//this.pool[i] = this.createWorker(i);
 			}
 		}
 

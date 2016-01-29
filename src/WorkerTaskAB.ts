@@ -17,19 +17,24 @@ export interface AbParams {
 export interface ResponseABHPP{
 	san: string,
 	score: number,
-	principalVariation: Move88[]
+	principalVariation: Move88[],
+    tree: Node88
 }
 
 export interface EventResponseABHPP {
 	data: ResponseABHPP
 }
 
+
+
 /*
 TODO:
 - Merge b and w logic
 * Try not to do sim.generate_moves() on evaluate
 - Dont do generate_moves if children is already populated (What about pruned lines?)
-- TODO Return principle variation
+* Return principle variation
+- collect equal scores and choose randomly
+- reuse tree from last iteration
 
 */
 
@@ -50,6 +55,8 @@ export class WorkerTaskAB extends Task{
 		return pv;
 	}
 
+    leaves: number;
+
 	public process(sim: Chess): ResponseABHPP {
 
 
@@ -59,24 +66,28 @@ export class WorkerTaskAB extends Task{
 		self["p_generate_fen"] = 0;
 		self["p_move_to_san"] = 0;
 		self["p_evaluate"] = 0;
-		
+        this.leaves = 0;
+
+
 		sim.load(this.params.node.fen);
 		//this.params.hint = [];
 		let score = this.alphaBeta(sim, this.params.node, this.params.depth, -1e9, 1e9, this.fenToTurn(this.params.node.fen) == "w", this.params.hint);
 		let pv = this.buildPrincipalVariation(this.params.node);
 		sim.load(this.params.node.fen);
 		let san = sim.move_to_san(this.params.node.bestMove.move.moveTo);
-		console.log("Finished search at depth: " + this.params.depth);
-		 console.log("Computation time: " + (((new Date().getTime()) - start) / 1000.0));
-		 console.log("generate_moves(): " + self["p_generate_moves"]);
-		 console.log("generate_fen(): " + self["p_generate_fen"]);
-		 console.log("move_to_san(): " + self["p_move_to_san"]);
-		 console.log("evaluate(): " + self["p_evaluate"]);
-		 console.log("attacked(): " + self["p_attacked"]);
+		console.log("W"+ this.params.depth + ":Finished search at depth: " + this.params.depth);
+		 console.log("W"+ this.params.depth + ":Computation time: " + (((new Date().getTime()) - start) / 1000.0));
+		 console.log("W"+ this.params.depth + ":generate_moves(): " + self["p_generate_moves"]);
+		 console.log("W"+ this.params.depth + ":generate_fen(): " + self["p_generate_fen"]);
+		 console.log("W"+ this.params.depth + ":move_to_san(): " + self["p_move_to_san"]);
+		 console.log("W"+ this.params.depth + ":evaluate(): " + self["p_evaluate"]);
+		 console.log("W"+ this.params.depth + ":attacked(): " + self["p_attacked"]);
+        console.log("W"+ this.params.depth + ":leaf nodes: " + this.leaves);
 		return {
 			san: san,
 			score: score,
-			principalVariation: pv
+			principalVariation: pv,
+            tree: this.params.node
 		}
 
 	}
@@ -88,146 +99,191 @@ export class WorkerTaskAB extends Task{
 	alphaBeta(sim: Chess, node: Node88, depth: number, alpha: number, beta: number, maximizingPlayer: boolean, pv: Move88[]): number {
 
 		if (depth == 0) {
-			let out = evaluator(sim, sim.generate_moves()).numeric;
+            this.leaves++;
+            let ms = sim.generate_moves();
+            node.children = ms.map(m => new Node88("", m, null));
+			let out = evaluator(sim, ms).numeric;
 			return out;
 		}
 
-		let moves: Move88[] = sim.generate_moves({ legal: false });
 		let turn = sim.turn();
-		node.children = [];
-
-		//console.log("PVle: " + pv.length);
-		if(pv.length > 0){
-			// Try principle variation first
-			let hint = pv.shift();
-			let idx = moves.findIndex((m) => {
-				return m.to == hint.to
-					&& m.from == hint.from;
-			});
-			console.log("Moved pv up from idx " + idx);
-			let n: Move88[] = moves.splice(idx, 1);
-			moves.unshift(n[0]);
-
-		}
-
-		// TODO collect equal scores and choose randomly
-		if (maximizingPlayer) {
-			// v: best so far
-			// let v = -1e9;
-			let idx = 0;
-			//let bestIdx = -1
-			for (let move of moves) {
-
-				// let san = sim.move_to_san(move);
-
-				sim.make_move(move);
 
 
-				// Filter illegal moves
-				if (sim.king_attacked(turn)) {
-					sim.undo_move();
-					continue;
-				}
+        let moves: Move88[];
+        let childrenPrecompiled = true;
+
+        if(!node.children){
+            moves = sim.generate_moves({ legal: false });
+            node.children = [];
+            childrenPrecompiled = false;
+        }
+
+		// Consider last iteration's principal variation first
+		//if(pv.length > 0){
+		//	// Try principle variation first
+		//	let hint = pv.shift();
+		//	let idx = moves.findIndex((m) => {
+		//		return m.to == hint.to
+		//			&& m.from == hint.from;
+		//	});
+		//	console.log("Moved pv up from idx " + idx);
+		//	let n: Move88[] = moves.splice(idx, 1);
+		//	moves.unshift(n[0]);
+        //
+		//}
 
 
-				let child = new Node88("", move, node);
-				// child.san = san;
+        let len = childrenPrecompiled ? node.children.length : moves.length;
+        let cutoff = false;
+        for (let i = 0; i < len; i++){
 
-				let childScore = this.alphaBeta(sim, child, depth - 1, alpha, beta, false, pv);
-				child.score = childScore;
-				// v = Math.max(v, childScore);
-				if (childScore > alpha) {
-					alpha = childScore;
-					node.bestMove = { move: child, score: new NumericScore(childScore) };
-					//bestIdx = idx;
-				}
+            // Select child
+            let child: Node88;
+            if(childrenPrecompiled){
+                child = node.children[i];
+            } else {
+                child = new Node88("", moves[i], null);
+            }
+            let move = child.moveTo;
 
-				// Restore
-				sim.undo_move();
+            sim.make_move(move);
 
-				// Store child
-				node.children.push(child);
+            if(!childrenPrecompiled){
+                // Filter illegal moves
+                if (sim.king_attacked(turn)) {
+                    sim.undo_move();
+                    continue;
+                } else {
+                    node.children.push(child);
+                }
+            }
 
-				if (beta <= alpha) {
-					// console.log("A: Cutting off at move: " + this.line(child) + ", depth:" + depth + " v: " + v);
-					break; /* cut off */
-				}
-				idx++;
-			}
-			// Order list with pricipal first
-			//if (bestIdx >= 0) {
-			//	let n = node.children.splice(bestIdx, 1);
-			//	node.children.unshift(n[0]);
-			//}
+            // Got valid child, got valid move
 
-			// Found no legal moves, game over
-			if (node.children.length == 0) {
-				let out = evaluator(sim, []).numeric;
-				return out;
-			}
+            if(!cutoff){
 
-			// Did not cut off
-			return alpha;
-		} else {
-			// let v = 1e9;
-			let idx = 0;
-			//let bestIdx = -1
-			for (let move of moves) {
+                // Go deeper
+                let childScore = this.alphaBeta(sim, child, depth - 1, alpha, beta, !maximizingPlayer, pv);
+                child.score = childScore;
 
-				// let san = sim.move_to_san(move);
+                // Update alpha/beta
+                if(maximizingPlayer){
+                    if (childScore > alpha) {
+                        alpha = childScore;
+                        node.bestMove = { move: child, score: new NumericScore(childScore) };
+                    }
+                } else {
+                    if (childScore < beta) {
+                        beta = childScore;
+                        node.bestMove = { move: child, score: new NumericScore(childScore) };
+                    }
+                }
 
-				sim.make_move(move);
+            }
 
-				// Filter illegal moves
-				if (sim.king_attacked(turn)){
-					sim.undo_move();
-					continue;
-				}
+            // Restore simulator
+            sim.undo_move();
+
+            // Should we cut off?
+            if (!cutoff && beta <= alpha) {
+                cutoff = true;
+
+                if(childrenPrecompiled)
+                    break;
+
+                // console.log("A: Cutting off at move: " + this.line(child) + ", depth:" + depth + " v: " + v);
+                //break; /* cut off */
+            }
+
+        }
+
+        // Found no legal moves, game over
+        if (node.children.length == 0) {
+            let out = evaluator(sim, []).numeric;
+            return out;
+        }
+
+        return maximizingPlayer ? alpha : beta;
 
 
-				let child = new Node88("", move, node);
-				// child.san = san;
-				// let out = "move " + move.piece + ": " + sim.algebraic(move.from) + " -> " + sim.algebraic(move.to);
-				// console.log(out);
-				// console.log("wtf");
 
-				// v = Math.min(v, this.alphaBeta(child, depth - 1, alpha, beta, true));
-				let childScore = this.alphaBeta(sim, child, depth - 1, alpha, beta, true, pv);
-				child.score = childScore;
-				if (childScore < beta) {
-					beta = childScore;
-					node.bestMove = { move: child, score: new NumericScore(childScore) };
-					//bestIdx = idx;
-				}
-				// beta = Math.min(beta, v);
+        //let stop = false;
+        //for (let move of moves) {
+        //
+        //    // Simulator state block start
+        //    sim.make_move(move);
+        //
+        //    // Filter illegal moves
+        //    if (sim.king_attacked(turn)) {
+        //        sim.undo_move();
+        //        continue;
+        //    }
+        //
+        //    let child = new Node88("", move, null);
+        //
+        //    if(!stop){
+        //
+        //        // Go deeper
+        //        let childScore = this.alphaBeta(sim, child, depth - 1, alpha, beta, !maximizingPlayer, pv);
+        //        child.score = childScore;
+        //
+        //        // Update alpha/beta
+        //        if(maximizingPlayer){
+        //            if (childScore > alpha) {
+        //                alpha = childScore;
+        //                node.bestMove = { move: child, score: new NumericScore(childScore) };
+        //            }
+        //        } else {
+        //            if (childScore < beta) {
+        //                beta = childScore;
+        //                node.bestMove = { move: child, score: new NumericScore(childScore) };
+        //            }
+        //        }
+        //
+        //    }
+        //
+        //    // Restore simulator
+        //    sim.undo_move();
+        //
+        //    // Simulator state block end
+        //
+        //
+        //    // Store child
+        //    node.children.push(child);
+        //
+        //    // Should we cut off?
+        //    if (!stop && beta <= alpha) {
+        //        stop = true;
+        //        // console.log("A: Cutting off at move: " + this.line(child) + ", depth:" + depth + " v: " + v);
+        //        //break; /* cut off */
+        //    }
+        //}
+        //
+        //// Found no legal moves, game over
+        //if (node.children.length == 0) {
+        //    let out = evaluator(sim, []).numeric;
+        //    return out;
+        //}
+        //
+        //return maximizingPlayer ? alpha : beta;
+        //
+        //
 
-				// Restore
-				sim.undo_move();
 
-				// Store child
-				node.children.push(child);
 
-				if (beta <= alpha) {
-					// console.log("B: Cutting off at move: " + this.line(child) + ", depth:" + depth + " v:" + v);
-					break; /* cut off */
-				}
-				idx++;
-			}
-			// Order list with pricipal first
-			//if (bestIdx >= 0) {
-			//	let n = node.children.splice(bestIdx, 1);
-			//	node.children.unshift(n[0]);
-			//}
 
-			// Found no legal moves, game over
-			if (node.children.length == 0) {
-				let out = evaluator(sim, []).numeric;
-				return out;
-			}
 
-			return beta;
-		}
 
 
 	}
+
+
+
+
+
+
+
+
+
+
 }

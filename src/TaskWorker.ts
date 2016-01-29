@@ -41,9 +41,11 @@ onmessage = function(event) {
 	if(task == null){
 		throw new Error("No such task: " + taskDef.processor);
 	} else {
+		let out = task.process(sim);
+		console.log("Posting back " + taskDef.id +  " depth: " + taskDef.params.depth);
 		postMessage( {
 			id: taskDef.id,
-			data: task.process(sim)
+			data: out
 		});
 	}
 };

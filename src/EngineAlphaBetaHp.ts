@@ -121,6 +121,8 @@ export class EngineAlphaBetaHp<T extends Evaluator> extends Engine<T> {
 
 
 
+
+
 		let fcalc = (depth: number, hint: Move88[]): Promise<any> => {
 			let task = new WorkerTaskAB({ node: root, alpha: -1e9, beta: 1e9, depth: depth, maximizing: this.fenToTurn(fen) == "w", hint: hint});
 			let resp: Promise<any> = this.pool.enqueueTask(task);
@@ -132,6 +134,10 @@ export class EngineAlphaBetaHp<T extends Evaluator> extends Engine<T> {
 				let pv = m.data.principalVariation;
 				bestVariation = pv;
 				if(!abort && depth < maxd){
+
+                    // Replace root
+                    root = m.data.tree;
+                    console.log("starting search at d "+(depth + 1));
 					fcalc(depth + 1, pv);
 				} else {
 					// Temp
