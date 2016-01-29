@@ -18,7 +18,7 @@ export interface ResponseABHPP{
 	san: string,
 	score: number,
 	principalVariation: Move88[],
-    tree: Node88
+    tree?: Node88
 }
 
 export interface EventResponseABHPP {
@@ -86,8 +86,8 @@ export class WorkerTaskAB extends Task{
 		return {
 			san: san,
 			score: score,
-			principalVariation: pv,
-            tree: this.params.node
+			principalVariation: pv
+            //tree: this.params.node
 		}
 
 	}
@@ -118,19 +118,19 @@ export class WorkerTaskAB extends Task{
             childrenPrecompiled = false;
         }
 
-		// Consider last iteration's principal variation first
-		//if(pv.length > 0){
-		//	// Try principle variation first
-		//	let hint = pv.shift();
-		//	let idx = moves.findIndex((m) => {
-		//		return m.to == hint.to
-		//			&& m.from == hint.from;
-		//	});
-		//	console.log("Moved pv up from idx " + idx);
-		//	let n: Move88[] = moves.splice(idx, 1);
-		//	moves.unshift(n[0]);
-        //
-		//}
+        // Consider last iteration's principal variation first
+		if(pv.length > 0){
+			// Try principle variation first
+			let hint = pv.shift();
+			let idx = moves.findIndex((m) => {
+				return m.to == hint.to
+					&& m.from == hint.from;
+			});
+			console.log("Moved pv up from idx " + idx);
+			let n: Move88[] = moves.splice(idx, 1);
+			moves.unshift(n[0]);
+
+		}
 
 
         let len = childrenPrecompiled ? node.children.length : moves.length;
@@ -190,6 +190,9 @@ export class WorkerTaskAB extends Task{
 
                 if(childrenPrecompiled)
                     break;
+
+                // Comment out to keep a full tree
+                break;
 
                 // console.log("A: Cutting off at move: " + this.line(child) + ", depth:" + depth + " v: " + v);
                 //break; /* cut off */
