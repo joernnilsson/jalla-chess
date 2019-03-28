@@ -46,7 +46,7 @@ export class SimulatorTaskExecutor {
 			));
 		}
 
-		return Promise.all(list);
+		return Promise.all<Node>(list);
 	}
 
 
