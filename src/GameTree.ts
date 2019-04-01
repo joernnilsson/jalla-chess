@@ -21,6 +21,7 @@ export class Node88 {
 	children: Node88[];
 
 	// debug
+	valid: boolean;
 	san: string;
 	score: number;
 

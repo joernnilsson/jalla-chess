@@ -41,6 +41,10 @@ export function evaluator(sim: Chess, moves?: Move88[]): Score {
 	let turn = sim.turn();
 	moves = moves || sim.generate_moves();
 
+	let wPenalties = [];
+	let bPenalties = [];
+
+
 	if(moves.length == 0){
 		// Game over
 		if (sim.in_draw()) {
@@ -112,6 +116,12 @@ export function evaluator(sim: Chess, moves?: Move88[]): Score {
 	let wKingPenalty = kingPenalty((sim.file(sim.underlaying().kings.w)), mw);
 	let bKingPenalty = kingPenalty((sim.file(sim.underlaying().kings.b)), mb);
 
+	// Castling rights
+	// Penalty for losing castling rights, less than king in center
+	let castlingpenalty = kingInCenterPenalty/2.0;
+	wPenalties.push(sim.underlaying().castling.w == "" ? castlingpenalty : 0);
+	bPenalties.push(sim.underlaying().castling.b == "" ? castlingpenalty : 0);
+
 	// Double pawns
 	let doublePawnPenalty = 0.2;
 	let pawnMap = {
@@ -174,8 +184,23 @@ export function evaluator(sim: Chess, moves?: Move88[]): Score {
 
 
 	// Sum up scores
-	let sw = mw - wKingPenalty - wDoublePanPenalty + knightInCenter.w;
-	let sb = mb - bKingPenalty - bDoublePanPenalty + knightInCenter.b;
+	let sw = mw - wKingPenalty - wDoublePanPenalty + knightInCenter.w - wPenalties.reduce((a,b) => a+b);
+	let sb = mb - bKingPenalty - bDoublePanPenalty + knightInCenter.b - bPenalties.reduce((a,b) => a+b);
+
+	console.log("white:");
+	console.log("\t+ material: "+mw);
+	console.log("\t- king pos: "+wKingPenalty);
+	console.log("\t- double pawn: "+wDoublePanPenalty);
+	console.log("\t- king center: "+knightInCenter.w);
+	console.log("\t- penalties: "+wPenalties.reduce((a,b) => a+b));
+
+	console.log("black:");
+	console.log("\t+ material: "+mb);
+	console.log("\t- king pos: "+bKingPenalty);
+	console.log("\t- double pawn: "+bDoublePanPenalty);
+	console.log("\t- king center: "+knightInCenter.b);
+	console.log("\t- penalties: "+bPenalties.reduce((a,b) => a+b));
+
 
 	return new NumericScore(sw - sb);// */ + ((Math.random() - 0.5) / 100000.0));
 };

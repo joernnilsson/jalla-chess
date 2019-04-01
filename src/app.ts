@@ -19,6 +19,7 @@ import {EngineAlphaBeta} from "./EngineAlphaBeta";
 import {EngineAlphaBetaHp} from "./EngineAlphaBetaHp";
 import {EngineAlphaBetaHpParallel} from "./EngineAlphaBetaHpParallel";
 import {EngineMinMaxParallel} from "./EngineMinMaxParallel";
+import {EngineTransferrable} from "./EngineTransferrable";
 
 import {MaterialEngine} from "./materialengine";
 
@@ -26,7 +27,9 @@ import {MaterialEngine} from "./materialengine";
 import {TaskWorkerPool} from "./TaskWorkerPool";
 import {TaskDef} from "./WorkerTask";
 import {WorkerTaskABHPP} from "./WorkerTaskABHPP";
-
+ 
+import {TaskAB} from "./ABMasterWorker";
+import { Node88 } from "./GameTree";
 
 // Worker testing
 // import "./taskworker";
@@ -62,9 +65,11 @@ class App {
 		this.engine3 = new EngineAlphaBetaHpParallel<EvaluatorMaterialCounter>();
 		this.engine2 = new EngineAlphaBeta<EvaluatorMaterialCounter>();
 		this.engine = new EngineAlphaBetaHp<EvaluatorMaterialCounter>();
+		//this.engine = new EngineTransferrable<EvaluatorMaterialCounter>();
 
 		// this.game.load_pgn("1. e4 Nh6 2. d4 Ng8 3. Bf4 f6 4. e5 f5 5. h4 b6 6. h5 Kf7 7. h6 gxh6 8. Qh5+ Kg7 9. Qf7+ Kxf7 10. Nh3 h5 11. Be2 Ke8 12. Bxh5#");
-		// this.game.load_pgn("1. e4 Nh6 2. d4 Ng8 3. Bf4 f6 4. e5 f5 5. h4 b6 6. h5 Kf7 7. h6 gxh6 8. Qh5+ Kg7 9. Qf7+ Kxf7 10. Nh3 h5");
+		//this.game.load_pgn("1. e4 Nh6 2. d4 Ng8 3. Bf4 f6 4. e5 f5 5. h4 b6 6. h5 Kf7 7. h6 gxh6 8. Qh5+ Kg7 9. Qf7+ Kxf7 10. Nh3 h5");
+		this.game.load_pgn("a3 Nh6 2. b3 e6 3. c3 Bd6");
 		// this.game.load_pgn("1. e4 a6 2. d4 f6 3. f4 g5 4. Qh5#");
 		// this.game.load_pgn("1. e4 a6 2. d4 f6 ");
 
@@ -84,6 +89,17 @@ class App {
 		//let TWC = require("worker?name=taskworker-[hash].js!./taskworker");
 		//let tw: Worker = new TWC();
 		//tw.postMessage("Batman");
+
+
+		// Test run
+		/*
+		let sim = new Chess();
+		let fen = "r1bq1bnr/p1ppp2p/np4k1/3PPp1p/5B2/7N/PPP2PPR/RN2KB2 w Q - 1 13";
+		sim.load(fen);
+		let root = new Node88(fen, null, null);
+		let task = new TaskAB(root);
+		task.alphaBeta(sim, root, 2, -11.615384615384617, -10.830769230769228, true, []);
+	*/
 
 
 
@@ -195,6 +211,8 @@ class App {
 	onSnapEnd() {
 	  this.board.position(this.game.fen());
 	};
+
+
 
 
 }

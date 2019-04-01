@@ -57,7 +57,7 @@ interface ResponseABHPP{
 	tree?: Node88
 }
 
-class TaskAB {
+export class TaskAB {
     root: Node88;
 
 	constructor(root: Node88) {
@@ -84,7 +84,7 @@ class TaskAB {
 		let deferred = new Deferred<string>();
 
 		let d = 1;
-		let maxd = 4;
+		let maxd = 20;
 		let hint = [];
 		let san = "..";
 
@@ -144,6 +144,19 @@ class TaskAB {
 
 	alphaBeta(sim:Chess, node:Node88, depth:number, alpha:number, beta:number, maximizingPlayer:boolean, pv:Move88[]):number {
 
+		
+		let DEBUG = false;
+
+		let ts = [];
+		let trace = (k, v) => {
+			ts.push("\t"+k+": "+v);
+		}
+
+		if(DEBUG) trace("detph", depth);
+		if(DEBUG) trace("alpha", alpha);
+		if(DEBUG) trace("beta", beta);
+		if(DEBUG) trace("maximizingPlayer", maximizingPlayer);
+
 		if (depth == 0) {
 			this.leaves++;
 			let ms = sim.generate_moves();
@@ -181,7 +194,8 @@ class TaskAB {
 		let len = childrenPrecompiled ? node.children.length : moves.length;
 		let cutoff = false;
         let idx = 0;
-        let bestIdx = 0;
+		let bestIdx = 0;
+		if(DEBUG) trace("Children, pre loop", node.children.map(n => n.score + " " + n.valid).join("\n\t\t"));
 		for (let i = 0; i < len; i++) {
 
 			// Select child
@@ -195,6 +209,8 @@ class TaskAB {
 
 			sim.make_move(move);
 
+			if(DEBUG) trace("__________________move", move);
+
 			if (!childrenPrecompiled) {
 				// Filter illegal moves
 				if (sim.king_attacked(turn)) {
@@ -206,22 +222,32 @@ class TaskAB {
 			}
 
 			// Got valid child, got valid move
+			// w == maxizming(true)
+			// alpha: det beste white kan oppnå
+			// beta: det beste black kan oppnå
+
+			// cutoff: beta < alpha
 
 			if (!cutoff) {
 
 				// Go deeper
 				let childScore = this.alphaBeta(sim, child, depth - 1, alpha, beta, !maximizingPlayer, pv);
 				child.score = childScore;
+				child.valid = true;
 
+				if(DEBUG) trace("childScore", childScore);
 				// Update alpha/beta
 				if (maximizingPlayer) {
 					if (childScore > alpha) {
+
+						if(DEBUG) trace("***", "update-a");
 						alpha = childScore;
 						node.bestMove = {move: child, score: new NumericScore(childScore)};
                         bestIdx = idx;
 					}
 				} else {
 					if (childScore < beta) {
+						if(DEBUG) trace("***", "update-b");
 						beta = childScore;
 						node.bestMove = {move: child, score: new NumericScore(childScore)};
                         bestIdx = idx;
@@ -239,11 +265,22 @@ class TaskAB {
 			if (!cutoff && beta <= alpha) {
 				cutoff = true;
 
-				if (childrenPrecompiled)
+				if(DEBUG) trace("cutoff", cutoff);
+
+				if (childrenPrecompiled){
+					// Invalidate rest of the children
+					for (let j = i+1; j < len; j++) {
+						node.children[j].valid = false;
+					}
 					break;
+				}
+
+				this.dropped += len - i;
+
+
+
 
 				// Comment out to keep a full tree
-				this.dropped += len - i;
 				break;
 
 				// console.log("A: Cutting off at move: " + this.line(child) + ", depth:" + depth + " v: " + v);
@@ -253,6 +290,43 @@ class TaskAB {
 
 		}
 
+		// Sort moves
+		let nodecmp = (a, b, rising) => {
+			//console.log(a.score + " vs " + b.score);
+
+			if(a.valid && !b.valid)
+				return 1;
+			else if(!a.valid && b.valid)
+				return -1;
+
+			if(a.score>b.score){
+				return 1;
+			} else if (b.score>a.score){
+				return -1;
+			} else {
+				return 0;
+			}
+		}
+
+		if(DEBUG) trace("Children, pre sort", node.children.map(n => n.score + " " + n.valid).join("\n\t\t"));
+		node.children.sort((a,b) => nodecmp(a,b, maximizingPlayer));
+
+		if(DEBUG && node.bestMove){
+			if(Math.abs(node.children[0].score - node.bestMove.move.score) > 0.01){
+				console.log("error sorting idx: "+ bestIdx +", cutoff: "+ cutoff +", maximizingplayer: "+maximizingPlayer + ", bestmove: "+node.bestMove.move.score);
+			
+
+				if(DEBUG) trace("Children, post sort", node.children.map(n => n.score + " " + n.valid).join("\n\t\t"));
+
+				console.log("Trace: \n" + ts.join("\n"));
+				/*for (let c of node.children){
+					console.log("Child: " + c.score);
+				}*/
+
+			}
+			
+			//console.log("best sort: " + (node.children[0] == node.bestMove.move));
+		}
 
 
 
@@ -263,8 +337,8 @@ class TaskAB {
 		} else {
 
             // Order principal variation first
-            let best = node.children.splice(bestIdx, 1);
-            node.children.unshift(best[0]);
+            //let best = node.children.splice(bestIdx, 1);
+            //node.children.unshift(best[0]);
         }
 
 		return maximizingPlayer ? alpha : beta;

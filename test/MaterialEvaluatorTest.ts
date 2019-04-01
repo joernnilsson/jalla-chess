@@ -1,5 +1,5 @@
 
-import * as tsUnit from "tsunit.external/tsUnit";
+import * as tsUnit from "../node_modules/tsunit.external/tsUnit";
 
 import {Task} from "../src/WorkerTask";
 import {Node88} from "../src/GameTree";
@@ -10,12 +10,17 @@ import {Score, DrawScore, MateInScore, NumericScore, WonScore} from "../src/scor
 export class MaterialEvaluatorTest extends tsUnit.TestClass {
 
 
-    queenMissing_minus12() {
+    queenMissing() {
 
-        //let sim = new Chess();
-        //sim.load("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNB1KBNR w KQkq -");
-        //let score = evaluator(sim);
-        //console.log("missing queen: " + score);
+        let sim = new Chess();
+        console.log(sim.fen());
+        let fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNB1KBNR w KQkq - 0 1";
+        console.log(sim.validate_fen(fen));
+        let load = sim.load(fen);
+        console.log("Load restult: "+load);
+        let score = evaluator(sim);
+        console.log("Missing queen: " + score.numeric);
+
 
     }
 

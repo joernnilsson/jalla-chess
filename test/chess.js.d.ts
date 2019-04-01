@@ -25,6 +25,7 @@ export default class Chess{
 	turn(): string;
 
 	// Extended hp version
+	validate_fen(fen: string): any;
 	generate_moves(opts?: any): Move88[];
 	make_move(move: Move88): void;
 	make_pretty(move: Move88): string;
@@ -35,6 +36,10 @@ export default class Chess{
 	algebraic(square: number): string;
 	attacked(color: string, square): boolean;
 	king_attacked(color: string): boolean;
+
+	underlaying():any;
+	rank(s: number): number;
+	file(s: number): number;
 
 }
 

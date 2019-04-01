@@ -40,7 +40,7 @@ export class EngineAlphaBetaHp<T extends Evaluator> extends Engine<T> {
 	constructor() {
 		super();
 		this.simulator = new Chess();
-		this.pool = new TaskWorkerPool(1, false);
+		this.pool = new TaskWorkerPool(1, true);
 		// this.pool = new WorkerPool(8, false);
 	}
 
