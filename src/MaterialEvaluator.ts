@@ -1,7 +1,7 @@
 "use strict"
 
 
-import {default as Chess, Move88} from "chess.js";
+import {Chess, Move88} from "chess.js";
 import {Score, DrawScore, MateInScore, NumericScore, WonScore} from "./score";
 
 /*

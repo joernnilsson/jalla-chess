@@ -2,9 +2,9 @@
 /// <reference path="chessboardjs.d.ts" />
 
 // import {Chess} from "chess.js";
-// import * as ChessBoard from "chessboardjs";
-import ChessBoard from "chessboardjs";
-import Chess from "chess.js";
+import * as ChessBoard from "chessboardjs";
+//import {ChessBoard} from "chessboardjs";
+import {Chess} from "chess.js";
 import "chessboardjs/www/css/chessboard.css";
 // import {ChessComClient} from "./ChessComClient";
 import {Engine} from "./engine";

@@ -1,7 +1,7 @@
 import {AbMasterResult} from "./ABMasterWorker";
 "use strict";
 
-import {default as Chess, Move88} from "chess.js";
+import {Chess, Move88} from "chess.js";
 
 import {Deferred} from "./Deferred";
 import {WorkerTask, WorkerResult} from "./WorkerTask";
@@ -214,7 +214,7 @@ export class EngineAlphaBetaHp<T extends Evaluator> extends Engine<T> {
         if(typeof(self["abmaster"]) != "undefined"){
             self["abmaster"].terminate();
         }
-        let TWC = require("worker?name=ABMasterWorker.js!./ABMasterWorker");
+        let TWC = require("worker-loader?name=ABMasterWorker.js!./ABMasterWorker");
         let master: Worker = new TWC();
 
         master.addEventListener("message", (event) => {

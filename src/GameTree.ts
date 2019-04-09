@@ -1,7 +1,7 @@
 "use strict"
 
 import {Score, DrawScore, MateInScore, NumericScore, WonScore} from "./score";
-import {default as Chess, Move88} from "chess.js";
+import {Chess, Move88} from "chess.js";
 
 interface BestMove88 {
 	score: Score;

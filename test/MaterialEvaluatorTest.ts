@@ -1,5 +1,5 @@
 
-import * as tsUnit from "../node_modules/tsunit.external/tsUnit";
+/*import * as tsUnit from "../node_modules/tsunit.external/tsUnit";
 
 import {Task} from "../src/WorkerTask";
 import {Node88} from "../src/GameTree";
@@ -26,3 +26,4 @@ export class MaterialEvaluatorTest extends tsUnit.TestClass {
 
 
 }
+*/

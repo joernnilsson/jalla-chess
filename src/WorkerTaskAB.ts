@@ -1,6 +1,6 @@
 import {Task} from "./WorkerTask";
 import {Node88} from "./GameTree";
-import {default as Chess, Move88} from "chess.js";
+import {Chess, Move88} from "chess.js";
 import {evaluator} from "./MaterialEvaluator";
 import {Score, DrawScore, MateInScore, NumericScore, WonScore} from "./score";
 

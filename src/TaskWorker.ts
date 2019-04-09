@@ -3,7 +3,7 @@
 // / <reference path="../node_modules/typescript/lib/lib.core.es6.d.ts" />
 
 
-import Chess from "chess.js";
+import {Chess} from "chess.js";
 import {WorkerTaskABHPP} from "./WorkerTaskABHPP";
 import {WorkerTaskAB} from "./WorkerTaskAB";
 

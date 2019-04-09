@@ -1,4 +1,4 @@
-import {default as Chess, Move88} from "chess.js";
+import {Chess, Move88} from "chess.js";
 import {Node88} from "./GameTree";
 import * as d3 from "d3";
 

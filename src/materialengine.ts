@@ -1,7 +1,7 @@
 /// <reference path="d3.d.ts" />
 "use strict";
 
-import Chess from "chess.js";
+import {Chess} from "chess.js";
 import * as d3 from "d3";
 // import * as format from "string-format";
 

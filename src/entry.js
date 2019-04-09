@@ -12,7 +12,7 @@ window.$ = jq;
 // var d3 = require("./d3");
 // window.d3 = d3;
 
-require("file?name=index.html!./index.html");
+require("file-loader?name=index.html!./index.html");
 
 // console.log(url1);
 // console.log(url2);

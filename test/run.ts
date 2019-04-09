@@ -1,4 +1,4 @@
-
+/*
 import {Task} from "../src/WorkerTask";
 import {Node88} from "../src/GameTree";
 import {default as Chess, Move88} from "chess.js";
@@ -34,3 +34,5 @@ console.log('Errors: ' + result.errors.length);
 //rl.question("Press any key to continue...", () => {
 //    rl.close();
 //});
+
+*/

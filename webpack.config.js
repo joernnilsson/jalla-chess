@@ -1,18 +1,18 @@
 require('es6-promise').polyfill();
 var path = require('path');
-var webpack = require('webpack');
+//var webpack = require('webpack');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 module.exports = {
 	entry: {
 		entry: "./src/entry.js",
-        test: "./test/run.ts"
+    //    test: "./test/run.ts"
 		// , tsworker: "awesome-typescript-loader?instanceName=worker&noLib=true!./src/taskworker"
 			// ,tsworker: "./src/tsworker"
 	},
 
 	resolve: {
-		extensions: ['', '.ts', '.tsx', '.webpack.js', '.web.js', '.js']
+		extensions: ['.ts', '.tsx', '.webpack.js', '.web.js', '.js']
 	},
 
 	// Source maps support (or 'inline-source-map' also works)
@@ -27,8 +27,10 @@ module.exports = {
 		new ExtractTextPlugin('entry.css')
 	],
 	module: {
-		loaders: [
+		
+		rules: [
 
+			/*
 		    {
                 loader: 'babel-loader',
                 test: /\.js$/,
@@ -36,7 +38,7 @@ module.exports = {
                   presets: 'es2015',
                 }
             },
-
+*/
 
 			// { test: /\.css$/, loader: "style!css" },
 
@@ -47,9 +49,10 @@ module.exports = {
 
 			{
 				test: /\.css$/,
-				loader: ExtractTextPlugin.extract('style-loader', 'css-loader')
+				use: ['style-loader', 'css-loader'] //ExtractTextPlugin.extract('style-loader', 'css-loader')
 			},
 
+			/*
 			{
 				test: /\.ts$/,
 				// loader: 'awesome-typescript-loader'
@@ -58,6 +61,12 @@ module.exports = {
 					'awesome-typescript-loader?instanceName=app'
 				]
 			},
+			*/
+			{
+				test: /\.tsx?$/,
+				use: 'ts-loader',
+				exclude: /node_modules/
+			  },
 
 			//{
 			//	test: /\.tsx$/,
@@ -69,15 +78,18 @@ module.exports = {
 			//	]
 			//},
 
+			
 			{
 				test: /\.(jpe?g|png|gif|svg)$/i,
-				loaders: [
-					'file?hash=sha512&digest=hex&name=images/[name]-[hash].[ext]',
-					'image-webpack?bypassOnDebug&optimizationLevel=7&interlaced=false'
+				use: [
+					'file-loader?hash=sha512&digest=hex&name=images/[name]-[hash].[ext]',
+					'image-webpack-loader'
 				]
 			}
+			
 
 		]
+		
 	},
 	externals: [{
 		child_process: 'empty'

@@ -9,7 +9,7 @@ import {WorkerTaskABHPP} from "./WorkerTaskABHPP";
 import {WorkerTaskAB} from "./WorkerTaskAB";
 
 // TODO remove
-import Chess from "chess.js";
+import {Chess} from "chess.js";
 
 // TODO This is a hack, it depends on transpiling to es5/commonjs
 declare var require: any;
@@ -129,7 +129,7 @@ export class TaskWorkerPool {
 			let __this = this;
 
 			// Import constructor. This only works because we happen to transpile to es5/commonjs.
-			let TWC = require("worker?name=taskworker.js!./TaskWorker");
+			let TWC = require("worker-loader?name=taskworker.js!./TaskWorker");
 			for (var i = 0; i < threads; i++){
 				this.pool.push(this.createWorker(i));
 			}
@@ -141,7 +141,7 @@ export class TaskWorkerPool {
 	}
 
 	private createWorker(idx: number): TaskWorker {
-		let TWC = require("worker?name=taskworker.js!./TaskWorker");
+		let TWC = require("worker-loader?name=taskworker.js!./TaskWorker");
 		//let taskWorker = WorkerFactory.create2();
 		let taskWorker: TaskWorker = new TWC();
 

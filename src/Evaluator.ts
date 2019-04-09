@@ -1,5 +1,5 @@
 
-import Chess from "chess.js";
+import {Chess} from "chess.js";
 import {Score, DrawScore, MateInScore, NumericScore, WonScore} from "./score";
 
 export abstract class Evaluator {
