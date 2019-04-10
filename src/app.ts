@@ -10,7 +10,6 @@ import "chessboardjs/www/css/chessboard.css";
 import {Engine} from "./engine";
 
 import {Evaluator} from "./Evaluator";
-import {EvaluatorMaterialCounter} from "./EvaluatorMaterialCounter";
 
 
 import {evaluator} from "../src/MaterialEvaluator";
@@ -21,7 +20,7 @@ import {EngineAlphaBetaHpParallel} from "./EngineAlphaBetaHpParallel";
 import {EngineMinMaxParallel} from "./EngineMinMaxParallel";
 import {EngineTransferrable} from "./EngineTransferrable";
 
-import {MaterialEngine} from "./materialengine";
+//import {MaterialEngine} from "./materialengine";
 
 // Testing
 import {TaskWorkerPool} from "./TaskWorkerPool";
@@ -62,14 +61,14 @@ class App {
 		// this.engine = new MaterialEngine();
 
 		// this.engine = new EngineMinMaxParallel<EvaluatorMaterialCounter>();
-		this.engine3 = new EngineAlphaBetaHpParallel<EvaluatorMaterialCounter>();
-		this.engine2 = new EngineAlphaBeta<EvaluatorMaterialCounter>();
-		this.engine = new EngineAlphaBetaHp<EvaluatorMaterialCounter>();
+		this.engine3 = new EngineAlphaBetaHpParallel<Evaluator>();
+		this.engine2 = new EngineAlphaBeta<Evaluator>();
+		this.engine = new EngineAlphaBetaHp<Evaluator>();
 		//this.engine = new EngineTransferrable<EvaluatorMaterialCounter>();
 
 		// this.game.load_pgn("1. e4 Nh6 2. d4 Ng8 3. Bf4 f6 4. e5 f5 5. h4 b6 6. h5 Kf7 7. h6 gxh6 8. Qh5+ Kg7 9. Qf7+ Kxf7 10. Nh3 h5 11. Be2 Ke8 12. Bxh5#");
 		//this.game.load_pgn("1. e4 Nh6 2. d4 Ng8 3. Bf4 f6 4. e5 f5 5. h4 b6 6. h5 Kf7 7. h6 gxh6 8. Qh5+ Kg7 9. Qf7+ Kxf7 10. Nh3 h5");
-		this.game.load_pgn("a3 Nh6 2. b3 e6 3. c3 Bd6");
+		//this.game.load_pgn("a3 Nh6 2. b3 e6 3. c3 Bd6");
 		// this.game.load_pgn("1. e4 a6 2. d4 f6 3. f4 g5 4. Qh5#");
 		// this.game.load_pgn("1. e4 a6 2. d4 f6 ");
 
@@ -125,6 +124,7 @@ class App {
 	}
 
 	load(fen: string){
+		console.log("Fen valid: "+this.game.validate_fen(fen));
 		this.game.load(fen);
 		this.board.position(this.game.fen());
 	}
@@ -167,7 +167,8 @@ class App {
 
 		  console.log("Making move");
 
-		  var possibleMoves = that.game.moves();
+			var possibleMoves = that.game.moves();
+			console.log(possibleMoves);
 
 		  // game over
 		  if (possibleMoves.length === 0) {

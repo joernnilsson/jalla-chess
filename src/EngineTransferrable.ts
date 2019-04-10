@@ -16,7 +16,7 @@ import {WorkerTaskAB, ResponseABHPP, EventResponseABHPP} from "./WorkerTaskAB";
 import {Engine} from "./engine";
 import {Evaluator} from "./Evaluator";
 
-import {visualize} from "./Node88Visualizer";
+//import {visualize} from "./Node88Visualizer";
 
 // TODO This is a hack, it depends on transpiling to es5/commonjs
 declare var require: any;

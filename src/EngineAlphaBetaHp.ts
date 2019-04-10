@@ -255,7 +255,7 @@ export class EngineAlphaBetaHp<T extends Evaluator> extends Engine<T> {
             console.log("E: Principal variation: " +  line + " (" + bestResult.score + ")");
             console.log("E: BestMove: " +  bestResult.score);
 
-
+			//visualize(bestResult.tree, root.fen);
 
         }, timeToThink);
 

@@ -37,7 +37,8 @@ export interface AbMasterResult {
     san: string,
     score: number,
     principalVariation: Move88[],
-    depth: number
+	depth: number,
+	tree: any
 }
 
 export interface AbParams {
@@ -120,12 +121,14 @@ export class TaskAB {
 
 
 
+
 			// Post message about the result
 			postMessage({
 				san: san,
 				score: score,
 				principalVariation: hint,
-				depth: d
+				depth: d,
+				tree: null//this.root
 				//tree: this.params.node
 			});
 

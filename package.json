@@ -9,8 +9,10 @@
     "@babel/preset-env": "^7.4.3",
     "@babel/register": "^7.4.0",
     "@types/chai": "^4.1.7",
+    "@types/d3": "5.7.2",
     "@types/mocha": "^5.2.6",
     "chai": "^4.2.0",
+    "d3": "^5.9.2",
     "image-webpack-loader": "^4.6.0",
     "mocha": "^6.0.2",
     "style-loader": "^0.23.1",
@@ -19,6 +21,7 @@
     "typescript": "^3.4.1",
     "webpack": "^4.29.6",
     "webpack-cli": "^3.3.0",
+    "webpack-dev-server": "^3.3.1",
     "worker-loader": "^2.0.0"
   },
   "dependencies": {
@@ -33,9 +36,12 @@
   "scripts": {
     "build": "webpack",
     "start": "node_modules/http-server/bin/http-server dist",
-    "test": "./node_modules/.bin/mocha --require ts-node/register test/**/*.test.ts"
+    "test": "./node_modules/.bin/mocha --require ts-node/register test/**/*.test.ts",
+    "dev": "webpack-dev-server"
   },
   "babel": {
-    "presets": ["env"]
+    "presets": [
+      "env"
+    ]
   }
 }
