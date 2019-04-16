@@ -1,6 +1,6 @@
 "use strict";
 
-import Chess from "chess.js";
+import {Chess} from "chess.js";
 
 import {Deferred} from "./Deferred";
 import {WorkerTask, WorkerResult} from "./WorkerTask";

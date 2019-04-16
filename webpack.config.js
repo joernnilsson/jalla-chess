@@ -2,17 +2,18 @@ require('es6-promise').polyfill();
 var path = require('path');
 var webpack = require('webpack');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
+var CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
 	entry: {
 		entry: "./src/entry.js",
-        test: "./test/run.ts"
+    //    test: "./test/run.ts"
 		// , tsworker: "awesome-typescript-loader?instanceName=worker&noLib=true!./src/taskworker"
 			// ,tsworker: "./src/tsworker"
 	},
 
 	resolve: {
-		extensions: ['', '.ts', '.tsx', '.webpack.js', '.web.js', '.js']
+		extensions: ['.ts', '.tsx', '.webpack.js', '.web.js', '.js']
 	},
 
 	// Source maps support (or 'inline-source-map' also works)
@@ -24,11 +25,19 @@ module.exports = {
 		filename: "[name].js"
 	},
 	plugins: [
-		new ExtractTextPlugin('entry.css')
+		new ExtractTextPlugin('entry.css'),
+		new CopyWebpackPlugin([
+				//{ from: 'node_modules/cm-chessboard/assets', to: 'assets' }
+		]),
+		new webpack.DefinePlugin({
+			__VERSION__: JSON.stringify(require("./package.json").version)
+	 })
 	],
 	module: {
-		loaders: [
+		
+		rules: [
 
+			/*
 		    {
                 loader: 'babel-loader',
                 test: /\.js$/,
@@ -36,7 +45,7 @@ module.exports = {
                   presets: 'es2015',
                 }
             },
-
+*/
 
 			// { test: /\.css$/, loader: "style!css" },
 
@@ -47,9 +56,10 @@ module.exports = {
 
 			{
 				test: /\.css$/,
-				loader: ExtractTextPlugin.extract('style-loader', 'css-loader')
+				use: ['style-loader', 'css-loader'] //ExtractTextPlugin.extract('style-loader', 'css-loader')
 			},
 
+			/*
 			{
 				test: /\.ts$/,
 				// loader: 'awesome-typescript-loader'
@@ -58,6 +68,12 @@ module.exports = {
 					'awesome-typescript-loader?instanceName=app'
 				]
 			},
+			*/
+			{
+				test: /\.tsx?$/,
+				use: 'ts-loader',
+				exclude: /node_modules/
+			  },
 
 			//{
 			//	test: /\.tsx$/,
@@ -69,15 +85,25 @@ module.exports = {
 			//	]
 			//},
 
+			
 			{
 				test: /\.(jpe?g|png|gif|svg)$/i,
-				loaders: [
-					'file?hash=sha512&digest=hex&name=images/[name]-[hash].[ext]',
-					'image-webpack?bypassOnDebug&optimizationLevel=7&interlaced=false'
+				use: [
+					'file-loader?hash=sha512&digest=hex&name=images/[name]-[hash].[ext]',
+					{
+						loader: 'image-webpack-loader',
+						options: {
+							svgo: {
+								enabled: false
+							}
+						}
+					}
 				]
 			}
+			
 
 		]
+		
 	},
 	externals: [{
 		child_process: 'empty'

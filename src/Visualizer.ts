@@ -1,5 +1,3 @@
-
-// /// <reference path="d3.d.ts" />
 // import d3 = require("d3");
 
 

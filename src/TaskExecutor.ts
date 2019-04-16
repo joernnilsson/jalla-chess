@@ -3,7 +3,7 @@
 
 
 
-import Chess from "chess.js";
+import {Chess} from "chess.js";
 import {Node} from "./GameTree";
 import {evaluator} from "./MaterialEvaluator";
 import {Score, DrawScore, MateInScore, NumericScore, WonScore} from "./score";
