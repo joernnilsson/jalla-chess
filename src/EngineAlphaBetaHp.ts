@@ -1,4 +1,4 @@
-import {AbMasterResult} from "./ABMasterWorker";
+import {AbMasterResult} from "./TaskAB";
 "use strict";
 
 import {Chess, Move88} from "chess.js";
@@ -10,8 +10,6 @@ import {Score, DrawScore, MateInScore, NumericScore, WonScore} from "./score";
 import {SimulatorTaskExecutor} from "./TaskExecutor";
 import {evaluator} from "./MaterialEvaluator";
 import {Node88} from "./GameTree";
-import {TaskWorkerPool} from "./TaskWorkerPool";
-import {WorkerTaskAB, ResponseABHPP, EventResponseABHPP} from "./WorkerTaskAB";
 
 import {Engine} from "./engine";
 import {Evaluator} from "./Evaluator";
@@ -21,26 +19,17 @@ import {visualize} from "./Node88Visualizer";
 // TODO This is a hack, it depends on transpiling to es5/commonjs
 declare var require: any;
 
-/*
-TODO
-- follow principal variation
-- use refutation tables
-- use transposition tables
-
-
-
-*/
 
 export class EngineAlphaBetaHp<T extends Evaluator> extends Engine<T> {
 
 	simulator: Chess;
-	pool: TaskWorkerPool;
+	//pool: TaskWorkerPool;
 	evaluator: T;
 
 	constructor() {
 		super();
 		this.simulator = new Chess();
-		this.pool = new TaskWorkerPool(1, true);
+		//his.pool = new TaskWorkerPool(1, true);
 		// this.pool = new WorkerPool(8, false);
 	}
 
@@ -50,37 +39,11 @@ export class EngineAlphaBetaHp<T extends Evaluator> extends Engine<T> {
 		return sims;
 	}
 
-	// Generate line
-	line(n: Node88): string {
-
-		interface rfnr {
-			sim: Chess,
-			sans: string
-		};
-
-		let rfn = (a: Node88): rfnr => {
-			if(a.parent){
-				// Get simulator of parent position
-				let pSim = rfn(a.parent);
-				// Get san
-				pSim.sans += " " + pSim.sim.move_to_san(a.moveTo);
-				// Make move to a position
-				pSim.sim.make_move(a.moveTo);
-				// Return sim to caller
-				return pSim;
-			} else {
-				return { sim: this.sim(a.fen), sans: "... " };
-			}
-		}
-		let sim = rfn(n.parent);
-
-		return sim.sans;
-	}
 
 	fenToTurn(fen: string): string {
 		return fen.split(" ")[1];
 	}
-
+/*
 	getBestMoveO(fen: string, timeToThink: number): Promise<string> {
 		let start = new Date().getTime();
 		let deferred = new Deferred<string>();
@@ -202,7 +165,7 @@ export class EngineAlphaBetaHp<T extends Evaluator> extends Engine<T> {
 		return deferred.getPromise();
 	}
 
-
+*/
     getBestMove(fen: string, timeToThink: number): Promise<string> {
         let start = new Date().getTime();
         let deferred = new Deferred<string>();
@@ -244,16 +207,35 @@ export class EngineAlphaBetaHp<T extends Evaluator> extends Engine<T> {
             // Keep a reference
             //self["abmaster"] = master;
 
+
             let sim = this.sim(root.fen);
-            let line = bestResult.principalVariation.map((m) => {
+            let lineArray = bestResult.principalVariation.map((m) => {
                 let san = sim.move_to_san(m);
                 sim.make_move(m);
                 return san;
-            }).join(" ");
+            });
+			let line = lineArray.join(" ")
+
+			sim.load(root.fen);
+			let pvdig = (node: Node88) => {
+				if(node.children){
+					let san = sim.move_to_san(node.children[0].moveTo);
+					console.log(">> "+san)
+					sim.make_move(node.children[0].moveTo);
+					return [san, ...pvdig(node.children[0])];
+				}
+				return [];
+			};
+			let arr = pvdig(root);
+			let line2 = pvdig(arr).join(" ");
 
             console.log("E: Computation time: " + (((new Date().getTime()) - start) / 1000.0));
             console.log("E: Principal variation: " +  line + " (" + bestResult.score + ")");
+            console.log("E: Principal variation: " +  line2 + " (" + root.score + ")");
             console.log("E: BestMove: " +  bestResult.score);
+
+			// Print a specific line
+
 
 			//visualize(bestResult.tree, root.fen);
 

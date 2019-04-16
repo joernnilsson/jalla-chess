@@ -16,8 +16,8 @@ interface BestMove{
 export class Node88 {
 	moveTo: Move88;
 	fen: string;
-	bestMove: BestMove88;
-	parent: Node88;
+	//bestMove: BestMove88;
+	//parent: Node88;
 	children: Node88[];
 
 	// debug
@@ -28,7 +28,7 @@ export class Node88 {
 	constructor(fen: string, moveTo: Move88, parent: Node88) {
 		this.moveTo = moveTo;
 		this.fen = fen;
-		this.parent = parent;
+		//this.parent = parent;
 	}
 }
 

@@ -1,8 +1,7 @@
-import {AbMasterResult} from "./ABMasterWorker";
 "use strict";
 
 import {Chess, Move88} from 'chess.js';
-
+import {AbMasterResult} from "./TaskAB";
 import {Deferred} from "./Deferred";
 import {WorkerTask, WorkerResult} from "./WorkerTask";
 import {Score, DrawScore, MateInScore, NumericScore, WonScore} from "./score";
@@ -10,8 +9,6 @@ import {Score, DrawScore, MateInScore, NumericScore, WonScore} from "./score";
 import {SimulatorTaskExecutor} from "./TaskExecutor";
 import {evaluator} from "./MaterialEvaluator";
 import {Node88} from "./GameTree";
-import {TaskWorkerPool} from "./TaskWorkerPool";
-import {WorkerTaskAB, ResponseABHPP, EventResponseABHPP} from "./WorkerTaskAB";
 
 import {Engine} from "./engine";
 import {Evaluator} from "./Evaluator";
@@ -36,6 +33,7 @@ enum PieceType {
 
 }
 
+let NODE_HEADER_SIZE = 0;
 let NODE_SIZE: number = 6;
 
 class NodeBuffer { 
@@ -69,7 +67,7 @@ class NodeBuffer {
 
 	setChild(idx: number, move: Move88){
 
-		let base = idx * NODE_SIZE;
+		let base = NODE_HEADER_SIZE + idx * NODE_SIZE;
 
 		this.view[base + 0] = this.getColorInt(move.color);
 		this.view[base + 1] = move.flags;
@@ -82,7 +80,7 @@ class NodeBuffer {
 
 	print(){
 		for (let i = 0; i<this.view.length; i++){
-			let base = i * NODE_SIZE;
+			let base = NODE_HEADER_SIZE + i * NODE_SIZE;
 			console.log(this.view.slice(base, base + NODE_SIZE).join(", "));
 		}
 	}
@@ -109,7 +107,9 @@ export class EngineTransferrable<T extends Evaluator> extends Engine<T> {
 		console.log(moves);
 
 		// Build root data strcture
-		let bufferSize = 4 * moves.length * NODE_SIZE;
+		let store = {}
+		
+		let bufferSize = 4 * (NODE_HEADER_SIZE + moves.length * NODE_SIZE);
 		let buffer = new ArrayBuffer(bufferSize);
 
 		let root = new NodeBuffer(buffer);
@@ -117,6 +117,8 @@ export class EngineTransferrable<T extends Evaluator> extends Engine<T> {
 		for (let i = 0; i<moves.length; i++){
 			root.setChild(i, moves[i]);
 		}
+
+		store[0] = 
 
 		root.print();
 

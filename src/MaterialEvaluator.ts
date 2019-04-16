@@ -61,6 +61,7 @@ export let Criteria = {
 	rooksInOpenFiles: "rooksInOpenFiles",
 	knightPositions: "knightPositions",
 	knightOnEdge: "knightOnEdge",
+	centerAttacks: "centerAttacks"
 	//passedPawn: "passedPawn",
 	//isolatedPawn: "isolatedPawn"
 }
