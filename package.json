@@ -1,6 +1,6 @@
 {
   "name": "jalla-chess",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "",
   "devDependencies": {
     "@babel/cli": "^7.4.3",
@@ -29,7 +29,7 @@
     "worker-loader": "^2.0.0"
   },
   "dependencies": {
-    "chess.js": "git+https://github.com/joernnilsson/chess.js.git#d9ab82c60ddbb43667255e0d08aa1d70fae15f80",
+    "chess.js": "git+https://github.com/joernnilsson/chess.js.git",
     "cm-chessboard": "^2.13.9",
     "es6-promise": "^4.2.6",
     "http-server": "^0.11.1",
