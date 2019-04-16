@@ -1,6 +1,6 @@
 {
   "name": "jalla-chess",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "",
   "devDependencies": {
     "@babel/cli": "^7.4.3",
@@ -12,7 +12,11 @@
     "@types/d3": "5.7.2",
     "@types/mocha": "^5.2.6",
     "chai": "^4.2.0",
+    "copy-webpack-plugin": "^5.0.2",
+    "css-loader": "^2.1.1",
     "d3": "^5.9.2",
+    "extract-text-webpack-plugin": "^4.0.0-beta.0",
+    "file-loader": "^3.0.1",
     "image-webpack-loader": "^4.6.0",
     "mocha": "^6.0.2",
     "style-loader": "^0.23.1",
@@ -25,19 +29,17 @@
     "worker-loader": "^2.0.0"
   },
   "dependencies": {
-    "jquery": "^3.3.1",
-    "file-loader": "^3.0.1",
-    "css-loader": "^2.1.1",
-    "extract-text-webpack-plugin": "^4.0.0-beta.0",
     "chess.js": "git+https://github.com/joernnilsson/chess.js.git#d9ab82c60ddbb43667255e0d08aa1d70fae15f80",
-    "chessboardjs": "0.0.1",
-    "es6-promise": "^4.2.6"
+    "cm-chessboard": "^2.13.9",
+    "es6-promise": "^4.2.6",
+    "http-server": "^0.11.1",
+    "jquery": "^3.3.1"
   },
   "scripts": {
     "build": "webpack",
     "start": "node_modules/http-server/bin/http-server dist",
     "test": "./node_modules/.bin/mocha --require ts-node/register test/**/*.test.ts",
-    "dev": "webpack-dev-server"
+    "dev": "webpack-dev-server --host 0.0.0.0"
   },
   "babel": {
     "presets": [

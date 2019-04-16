@@ -1,7 +1,8 @@
 require('es6-promise').polyfill();
 var path = require('path');
-//var webpack = require('webpack');
+var webpack = require('webpack');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
+var CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
 	entry: {
@@ -24,7 +25,13 @@ module.exports = {
 		filename: "[name].js"
 	},
 	plugins: [
-		new ExtractTextPlugin('entry.css')
+		new ExtractTextPlugin('entry.css'),
+		new CopyWebpackPlugin([
+				//{ from: 'node_modules/cm-chessboard/assets', to: 'assets' }
+		]),
+		new webpack.DefinePlugin({
+			__VERSION__: JSON.stringify(require("./package.json").version)
+	 })
 	],
 	module: {
 		
@@ -83,7 +90,14 @@ module.exports = {
 				test: /\.(jpe?g|png|gif|svg)$/i,
 				use: [
 					'file-loader?hash=sha512&digest=hex&name=images/[name]-[hash].[ext]',
-					'image-webpack-loader'
+					{
+						loader: 'image-webpack-loader',
+						options: {
+							svgo: {
+								enabled: false
+							}
+						}
+					}
 				]
 			}
 			

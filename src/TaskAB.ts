@@ -65,7 +65,7 @@ export class TaskAB {
 
         console.log("B:");
         let pvdig = (node: Node88) => {
-            if(node.children){
+            if(node.children && node.children.length > 0){
                 //console.log("> "+node.score)
                 return [node.children[0].moveTo, ...pvdig(node.children[0])];
             }

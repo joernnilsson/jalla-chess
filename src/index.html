@@ -1,7 +1,8 @@
 <html>
 <head>
-<link type="text/css" rel="stylesheet" href="entry.css" />
-    <style>
+
+    <meta name="viewport" content="width=420, initial-scale=1">
+<style>
 
  .node circle {
    fill: #fff;
@@ -19,10 +20,12 @@
  
     </style>
 </head>
-<body>
-<div style="font-size: 46px;">Jalla Chess</div>
+<body class="merida brown">
+<div style="font-size: 46px;">Jalla Chess <span style="font-size: 0.5em" id="version"></span></div>
 <div id="timeout" style="width: 395px; height: 5px; margin-top: 20px; margin-bottom: 20px; background-color: black;"></div>
-<div id="board" style="width: 400px; margin-top: 20px; margin-bottom: 20px;"></div>
+<div id="container">
+<div class="" id="board" style="margin-top: 20px; margin-bottom: 20px; width: 400px; height: 400px"></div>
+</div>
 <div id="engine-stats" style="font-size: 16px;"></div>
 <script type="application/javascript" src="entry.js"></script>
 </body>

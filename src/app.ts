@@ -1,16 +1,13 @@
 /// <reference path="chess.js.d.ts" />
-/// <reference path="chessboardjs.d.ts" />
 
-// import {Chess} from "chess.js";
-import * as ChessBoard from "chessboardjs";
-//import {ChessBoard} from "chessboardjs";
 import {Chess} from "chess.js";
-import "chessboardjs/www/css/chessboard.css";
-// import {ChessComClient} from "./ChessComClient";
+
 import {Engine} from "./engine";
 
 import {Evaluator} from "./Evaluator";
 
+import {Chessboard, COLOR, MOVE_INPUT_MODE, INPUT_EVENT_TYPE} from "cm-chessboard";
+import "cm-chessboard/styles/cm-chessboard.css";
 
 import {evaluator} from "../src/MaterialEvaluator";
 
@@ -28,6 +25,7 @@ import {WorkerTaskABHPP} from "./WorkerTaskABHPP";
  
 import {TaskAB} from "./TaskAB";
 import { Node88 } from "./GameTree";
+import { geoAzimuthalEquidistant } from "d3";
 
 // Worker testing
 // import "./taskworker";
@@ -38,14 +36,14 @@ import { Node88 } from "./GameTree";
 
 // TODO I think this is a hack (you are correct, it depends on transpiling to es5/commonjs)
 declare var require: any;
+declare var __VERSION__: any;
 
 class App {
 
-	board: ChessBoard;
+	board: Chessboard;
 	game: Chess;
 	engine: Engine<Evaluator>;
-	engine2: Engine<Evaluator>;
-	engine3: Engine<Evaluator>;
+	timeToThink: number;
 	// chessComClient: ChessComClient;
 
 	constructor() {
@@ -58,8 +56,12 @@ class App {
 		// Chess game
 		this.game = new Chess();
 		// this.engine = new MaterialEngine();
+		this.timeToThink = 8000;
 
 		this.engine = new EngineAlphaBetaHp<Evaluator>();
+
+		// Print version number
+		document.getElementById("version").innerText = __VERSION__;
 
 		// this.game.load_pgn("1. e4 Nh6 2. d4 Ng8 3. Bf4 f6 4. e5 f5 5. h4 b6 6. h5 Kf7 7. h6 gxh6 8. Qh5+ Kg7 9. Qf7+ Kxf7 10. Nh3 h5 11. Be2 Ke8 12. Bxh5#");
 		//this.game.load_pgn("1. e4 Nh6 2. d4 Ng8 3. Bf4 f6 4. e5 f5 5. h4 b6 6. h5 Kf7 7. h6 gxh6 8. Qh5+ Kg7 9. Qf7+ Kxf7 10. Nh3 h5");
@@ -96,33 +98,74 @@ class App {
 		task.alphaBeta(sim, root, 2, -11.615384615384617, -10.830769230769228, true, []);
 	*/
 
+		let spriteUrl = require("cm-chessboard/assets/images/chessboard-sprite.svg");
+		console.log(spriteUrl);
 
+		this.board = new Chessboard(
+			document.getElementById("board"),
+			{ 
+				orientation: COLOR.white,
+				moveInputMode: MOVE_INPUT_MODE.dragPiece,
+				position: this.game.fen(),
+				responsive: true,
+				sprite:  {
+					url: spriteUrl
+				}
 
-		// ChessBoard
-		let pieceReq = (p) => {	
-			return require("chessboardjs/www/img/chesspieces/alpha/" + p + ".png");
-		};
+			});
 
-		this.board = new ChessBoard("board", {
-			draggable: true,
-			pieceTheme: pieceReq, 
-			position: this.game.fen(),
-			onDragStart: (...args: any[]) => this.onDragStart.apply(this, args),
-			onDrop: (...args: any[]) => this.onDrop.apply(this, args),
-			onSnapEnd: (...args: any[]) => this.onSnapEnd.apply(this, args)
-		});
+		let inputHandler = (event) => {
+			if (event.type === INPUT_EVENT_TYPE.moveDone) {
+					const move = {from: event.squareFrom, to: event.squareTo}
+					const result = this.game.move(move)
+					if (result) {
+							event.chessboard.disableMoveInput()
+							this.board.setPosition(this.game.fen());
+
+							// Wait for animation
+							setTimeout(() => {
+
+								var possibleMoves = this.game.moves();
+
+								// game over
+								if (possibleMoves.length === 0) {
+									alert("Gmae over!");
+									return;
+								}
+
+								let movea = this.engine.getBestMove(this.game.fen(), this.timeToThink);
+
+								movea.then((move: string) => {
+									console.log("The best move was: " + move);
+									this.game.move(move);
+									this.board.setPosition(this.game.fen());
+									this.board.enableMoveInput(inputHandler, COLOR.white)
+								})
+
+							}, 150);
+
+					} else {
+							console.warn("invalid move", move)
+					}
+					return result
+			} else {
+					return true
+			}
+	}
+
+		this.board.enableMoveInput(inputHandler, COLOR.white)
 
 	}
 
 	loadPgn(pgn: string){
 		this.game.load_pgn(pgn);
-		this.board.position(this.game.fen());
+		this.board.setPosition(this.game.fen());
 	}
 
 	load(fen: string){
 		console.log("Fen valid: "+this.game.validate_fen(fen));
 		this.game.load(fen);
-		this.board.position(this.game.fen());
+		this.board.setPosition(this.game.fen());
 	}
 
 
@@ -130,87 +173,6 @@ class App {
 
         console.log("\"" + this.game.fen() + "\" (" + evaluator(this.game).numeric + ")");
     }
-
-	// do not pick up pieces if the game is over
-	// only pick up pieces for White
-	onDragStart(source, piece, position, orientation) {
-
-		if (this.game.in_checkmate() === true || this.game.in_draw() === true ||
-			piece.search(/^b/) !== -1) {
-			return false;
-		}
-	};
-
-	onDrop(source, target) {
-
-		// see if the move is legal
-		var move = this.game.move({
-			from: source,
-			to: target,
-			promotion: 'q' // NOTE: always promote to a queen for example simplicity
-		});
-
-		// illegal move
-		if (move === null) return 'snapback';
-
-
-
-
-
-	//   // make random legal move for black
-	  let that = this;
-	  setTimeout(() => {
-
-		  console.log("Making move");
-
-			var possibleMoves = that.game.moves();
-			console.log(possibleMoves);
-
-		  // game over
-		  if (possibleMoves.length === 0) {
-			  alert("Gmae over!");
-			  return;
-		  }
-
-
-
-
-		  // let move = that.engine.findBestMove(that.game.fen(), 1);
-		  // let movea = that.engine.findBestMoveAsync(that.game.fen(), 3000);
-		  // let movea = that.engine.findBestMoveParallel(that.game.fen(), 100);
-		  //let movea = that.engine.findBestMoveAlphaBeta(that.game.fen(), 500);
-
-		  // let movet = that.engine2.getBestMove(that.game.fen());
-		  let movea = that.engine.getBestMove(that.game.fen(), 8000);
-
-		  movea.then((move: string) => {
-			  console.log("The best move was: " + move);
-			  that.game.move(move);
-			  that.board.position(that.game.fen());
-		  })
-
-
-		  // let move = that.engine.findBestMoveRecursive(that.game.fen(), 3);
-
-
-		  // var randomIndex = Math.floor(Math.random() * possibleMoves.length);
-		  // let move = possibleMoves[randomIndex];
-
-		  // that.game.move(move);
-		  // that.board.position(that.game.fen());
-
-
-	  }, 150); // Wait for animation
-	};
-
-	// update the board position after the piece snap
-	// for castling, en passant, pawn promotion
-	onSnapEnd() {
-	  this.board.position(this.game.fen());
-	};
-
-
-
 
 }
 
