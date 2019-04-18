@@ -29,7 +29,7 @@ onmessage = function(event) {
 
 	switch(event.data.cmd){
 		case 'start':
-			task = new TaskAB(event.data.node, sim, 2, resultCallback);
+			task = new TaskAB(event.data.node, sim, 50, resultCallback);
 			task.iterativeDeepening();
 		break
 	}
