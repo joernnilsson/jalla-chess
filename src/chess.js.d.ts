@@ -10,6 +10,8 @@
 	
 	export class Chess{
 	
+		constructor(fen?: string);
+
 		in_checkmate(): boolean;
 		in_draw(): boolean;
 		

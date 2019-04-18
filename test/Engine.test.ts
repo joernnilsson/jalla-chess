@@ -111,5 +111,6 @@ it('should not sacrifice knight in corener case', function() {
 });
 
   // Why did it move away from knight? "8/p5K1/1p6/8/1nk4Q/6P1/8/8 b - - 1 54"
+  // 4k2r/6R1/1P2pp1p/8/K3p3/P3P3/5r1P/2R5 w k - 0 31" => b7, ser ikke matt
 
 });

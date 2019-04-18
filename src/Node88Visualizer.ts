@@ -11,7 +11,7 @@ export function visualize(node: Node88, fen: string){
 		children: Array<HierNode>
 	}
 
-	let sim = Chess(fen);
+	let sim = new Chess(fen);
 	console.log(sim.fen());
 
 	var nodesEvaluated = 0;
@@ -26,7 +26,7 @@ export function visualize(node: Node88, fen: string){
 
 		let v = {
 			// name: node.bestMove ? node.bestMove.move.moveTo + " (" + node.bestMove.score.numeric + ")" : "na",
-			name: (n.san ? n.san : "na") + " (" + (typeof n.score != "undefined" ? n.score.toFixed(2) : "") + "/" + (typeof n.children ? n.children[0].score.toFixed(2) : "") + ")",
+			name: (n.san ? n.san : "na") + " (" + (typeof n.score != "undefined" ? n.score.toFixed(2) : "") + "/" + (typeof n.children != "undefined" && n.children.length > 0 && n.children[0].score ? n.children[0].score.toFixed(2) : "") + ")",
 			// name: (n.san ? n.san : "na"),
 			children: []
 		};

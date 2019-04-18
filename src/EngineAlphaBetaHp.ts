@@ -236,8 +236,8 @@ export class EngineAlphaBetaHp<T extends Evaluator> extends Engine<T> {
 
 			// Print a specific line
 
-
-			//visualize(bestResult.tree, root.fen);
+			if(bestResult.tree)
+				visualize(bestResult.tree, root.fen);
 
         }, timeToThink);
 

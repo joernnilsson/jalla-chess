@@ -109,7 +109,7 @@ export class MaterialEvaluator extends Evaluator{
 			if (sim.in_draw()) {
 				return gains;
 			} else if (sim.in_checkmate()) {
-				gains[turn == "w" ? "b" : "w"].push("won",turn == 'w' ? 1e6 : -1e6);
+				gains[turn].push("mate", -1e6);
 				return gains;
 			}
 		}

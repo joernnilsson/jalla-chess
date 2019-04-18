@@ -44,6 +44,7 @@ class App {
 	game: Chess;
 	engine: Engine<Evaluator>;
 	timeToThink: number;
+	inputHandler: (event: any) => any;
 	// chessComClient: ChessComClient;
 
 	constructor() {
@@ -114,9 +115,9 @@ class App {
 
 			});
 
-		let inputHandler = (event) => {
+		this.inputHandler = (event) => {
 			if (event.type === INPUT_EVENT_TYPE.moveDone) {
-					const move = {from: event.squareFrom, to: event.squareTo}
+					const move = {from: event.squareFrom, to: event.squareTo, promotion: "q"}
 					const result = this.game.move(move)
 					if (result) {
 							event.chessboard.disableMoveInput()
@@ -139,7 +140,7 @@ class App {
 									console.log("The best move was: " + move);
 									this.game.move(move);
 									this.board.setPosition(this.game.fen());
-									this.board.enableMoveInput(inputHandler, COLOR.white)
+									this.board.enableMoveInput(this.inputHandler, COLOR.white);
 								})
 
 							}, 150);
@@ -151,23 +152,42 @@ class App {
 			} else {
 					return true
 			}
-	}
+		}
 
-		this.board.enableMoveInput(inputHandler, COLOR.white)
+		this.board.enableMoveInput(this.inputHandler, COLOR.white)
 
 	}
 
 	loadPgn(pgn: string){
 		this.game.load_pgn(pgn);
 		this.board.setPosition(this.game.fen());
+		if(this.game.turn() == 'w'){
+			this.board.enableMoveInput(this.inputHandler, COLOR.white)
+		} else { 
+			this.board.disableMoveInput();
+		}
 	}
 
 	load(fen: string){
 		console.log("Fen valid: "+this.game.validate_fen(fen));
 		this.game.load(fen);
 		this.board.setPosition(this.game.fen());
+		if(this.game.turn() == 'w'){
+			this.board.enableMoveInput(this.inputHandler, COLOR.white)
+		} else { 
+			this.board.disableMoveInput();
+		}
 	}
 
+	undo(){
+		this.game.undo_move();
+		this.board.setPosition(this.game.fen());
+		if(this.game.turn() == 'w'){
+			this.board.enableMoveInput(this.inputHandler, COLOR.white)
+		} else { 
+			this.board.disableMoveInput();
+		}
+	}
 
     evaluate(){
 
