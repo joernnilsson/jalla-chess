@@ -3,6 +3,7 @@ var path = require('path');
 var webpack = require('webpack');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var CopyWebpackPlugin = require('copy-webpack-plugin');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
 	entry: {
@@ -10,6 +11,16 @@ module.exports = {
     //    test: "./test/run.ts"
 		// , tsworker: "awesome-typescript-loader?instanceName=worker&noLib=true!./src/taskworker"
 			// ,tsworker: "./src/tsworker"
+	},
+
+
+	optimization: {
+		minimizer: [new UglifyJsPlugin({
+			uglifyOptions: {
+				mangle: false,
+				sourceMap: true
+    }
+		})]
 	},
 
 	resolve: {
@@ -31,7 +42,7 @@ module.exports = {
 		]),
 		new webpack.DefinePlugin({
 			__VERSION__: JSON.stringify(require("./package.json").version)
-	 })
+		}),
 	],
 	module: {
 		
