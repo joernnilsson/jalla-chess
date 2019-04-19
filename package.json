@@ -1,6 +1,6 @@
 {
   "name": "jalla-chess",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "description": "",
   "devDependencies": {
     "@babel/cli": "^7.4.3",
