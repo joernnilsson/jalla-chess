@@ -17,8 +17,8 @@ module.exports = {
 	optimization: {
 		minimizer: [new UglifyJsPlugin({
 			uglifyOptions: {
-				mangle: false,
-				sourceMap: true
+				sourceMap: true,
+				safari10: true
     }
 		})]
 	},
